@@ -117,8 +117,11 @@ export class UsersService {
     return this.userRepository.save(userFromDb)
   }
 
-  async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const userFromDb = await this.findOneById(id)
+  async updateProfile(
+    email: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<User> {
+    const userFromDb = await this.findOne(email)
     userFromDb.firstName = updateUserDto.firstName
     userFromDb.lastName = updateUserDto.lastName
     userFromDb.institution = updateUserDto.institution
