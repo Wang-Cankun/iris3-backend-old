@@ -51,6 +51,14 @@ export class UsersService {
     return user
   }
 
+  async findOneById(id: string) {
+    const user = await this.userRepository.findOne(id)
+    if (!user) {
+      throw new NotFoundException(`User id #${id} not found`)
+    }
+    return user
+  }
+
   async findOne(email: string) {
     const user = await this.userRepository.findOne({
       where: {
@@ -109,11 +117,8 @@ export class UsersService {
     return this.userRepository.save(userFromDb)
   }
 
-  async updateProfile(
-    email: string,
-    updateUserDto: UpdateUserDto
-  ): Promise<User> {
-    const userFromDb = await this.findOne(email)
+  async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const userFromDb = await this.findOneById(id)
     userFromDb.firstName = updateUserDto.firstName
     userFromDb.lastName = updateUserDto.lastName
     userFromDb.institution = updateUserDto.institution
