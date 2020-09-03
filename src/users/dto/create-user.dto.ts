@@ -1,6 +1,6 @@
 import { IsString, IsBoolean } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
-import { isString, isBoolean } from 'util'
+
 export class CreateUserDto {
   @ApiProperty({ description: 'The email of a user.' })
   @IsString()

@@ -14,13 +14,13 @@ COPY package*.json ./
 # build necessary, even if no static files are needed,
 # since it builds the server as well
 
-RUN npm Install
+RUN npm install
 
 # If you are building your code for production
 # RUN npm ci --only=production
 
 # set app port
-EXPOSE 3000
+EXPOSE 9005
 
 # start the app
-CMD [ "npm","run" , "start" ]
+CMD [ "npm", "run" , "start" ]
