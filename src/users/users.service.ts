@@ -1,16 +1,11 @@
-import {
-  Injectable,
-  NotFoundException,
-  HttpException,
-  HttpStatus
-} from '@nestjs/common'
-import { Repository, Connection } from 'typeorm'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { Job } from './entities/job.entity'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import * as nodemailer from 'nodemailer'
+import * as bcrypt from 'bcrypt'
 
 // export type User = any
 export type Users = any
@@ -26,47 +21,54 @@ export class UsersService {
     private readonly jobRepository: Repository<Job>
   ) {}
 
-  isValidEmail(email: string) {
+  isValidEmail(email: string): boolean {
     if (email) {
       const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       return re.test(email)
     } else return false
   }
 
-  findAll() {
+  async hashPassword(plainPassword: string): Promise<string> {
+    // Set 10 as salt
+    const hashedPassword = await bcrypt.hash(plainPassword, 10)
+    return hashedPassword
+  }
+
+  async validatePassword(
+    plainPassword: string,
+    hashedPassword: string
+  ): Promise<boolean> {
+    // Set 10 as salt
+    // const hashedPassword = await this.hashPassword(plainPassword)
+    const isPasswordMatching = await bcrypt.compare(
+      plainPassword,
+      hashedPassword
+    )
+    return isPasswordMatching
+  }
+
+  findAll(): Promise<User[]> {
     return this.userRepository.find({
       relations: ['job']
     })
   }
 
-  async findOneByEmail(email: string) {
+  async findOneByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: {
         email: email
       }
     })
     if (!user) {
-      return false
+      throw new NotFoundException(`Email ${email} not found`)
     }
     return user
   }
 
-  async findOneById(id: string) {
+  async findOneById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id)
     if (!user) {
-      throw new NotFoundException(`User id #${id} not found`)
-    }
-    return user
-  }
-
-  async findOne(email: string) {
-    const user = await this.userRepository.findOne({
-      where: {
-        email: email
-      }
-    })
-    if (!user) {
-      throw new NotFoundException(`User email #${email} not found`)
+      throw new NotFoundException(`User ID #${id} not found`)
     }
     return user
   }
@@ -75,12 +77,7 @@ export class UsersService {
     const job = await Promise.all(
       createUserDto.job.map((email) => this.preloadJobByName(email))
     )
-    const userFromDb = await this.findOneByEmail(createUserDto.email)
-    if (userFromDb)
-      throw new HttpException(
-        'REGISTRATION.USER_ALREADY_REGISTERED',
-        HttpStatus.CONFLICT
-      )
+    createUserDto.password = await this.hashPassword(createUserDto.password)
     const user = this.userRepository.create({
       ...createUserDto,
       job
@@ -88,7 +85,7 @@ export class UsersService {
     return this.userRepository.save(user)
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const job =
       updateUserDto.job &&
       (await Promise.all(
@@ -101,27 +98,22 @@ export class UsersService {
       job
     })
     if (!user) {
-      throw new NotFoundException(`user #${id} not found`)
+      throw new NotFoundException(`User ID #${id} not found`)
     }
     return this.userRepository.save(user)
   }
 
   async updatePassword(
-    email: string,
+    id: string,
     updateUserDto: UpdateUserDto
   ): Promise<User> {
-    const userFromDb = await this.findOne(email)
-    if (!userFromDb)
-      throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND)
-    userFromDb.password = updateUserDto.password
+    const userFromDb = await this.findOneById(id)
+    userFromDb.password = await this.hashPassword(updateUserDto.password)
     return this.userRepository.save(userFromDb)
   }
 
-  async updateProfile(
-    email: string,
-    updateUserDto: UpdateUserDto
-  ): Promise<User> {
-    const userFromDb = await this.findOne(email)
+  async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const userFromDb = await this.findOneById(id)
     userFromDb.firstName = updateUserDto.firstName
     userFromDb.lastName = updateUserDto.lastName
     userFromDb.institution = updateUserDto.institution
@@ -129,17 +121,17 @@ export class UsersService {
     return this.userRepository.save(userFromDb)
   }
 
-  private async preloadJobByName(email: string): Promise<Job> {
-    const existingJob = await this.jobRepository.findOne({ email })
+  private async preloadJobByName(id: string): Promise<Job> {
+    const existingJob = await this.jobRepository.findOne(id)
     if (existingJob) {
       return existingJob
     }
-    return this.jobRepository.create({ email })
+    return this.jobRepository.create(existingJob)
   }
 
-  async remove(id: string) {
-    const coffee = await this.findOne(id)
-    return this.userRepository.remove(coffee)
+  async remove(id: string): Promise<User> {
+    const user = await this.findOneById(id)
+    return this.userRepository.remove(user)
   }
 
   async queryUserInfo(username: string): Promise<User | undefined> {
@@ -149,6 +141,14 @@ export class UsersService {
     return result
   }
 
+  async test(updateUserDto: UpdateUserDto): Promise<any> {
+    const user = await this.findOneByEmail(updateUserDto.email)
+
+    console.log(
+      await this.validatePassword(updateUserDto.password, user.password)
+    )
+    return 1
+  }
   sendEmailVerification(email: string): void {
     const content =
       `<table class='body' style='border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #f6f6f6;' border='0' cellspacing='0' cellpadding='0'>
