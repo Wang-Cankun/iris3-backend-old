@@ -11,6 +11,7 @@ import { UsersService } from 'src/users/users.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/users/entities/user.entity'
 import { Job } from 'src/users/entities/job.entity'
+import { EmailService } from 'src/email/email.service'
 
 @Module({
   imports: [
@@ -22,7 +23,13 @@ import { Job } from 'src/users/entities/job.entity'
       signOptions: { expiresIn: '60h' }
     })
   ],
-  providers: [AuthService, UsersService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    UsersService,
+    EmailService,
+    LocalStrategy,
+    JwtStrategy
+  ],
   exports: [AuthService],
   controllers: [AuthController]
 })

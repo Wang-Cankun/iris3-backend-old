@@ -29,14 +29,9 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: string): Promise<User> {
-    return this.usersService.findOneById(id)
-  }
-
-  @Post('/reset/:email')
-  sendResetEmail(@Param('email') email: string): void {
-    return this.usersService.sendEmailVerification(email)
+  @Get(':email')
+  findOne(@Param('email') email: string): Promise<User> {
+    return this.usersService.findOneByEmail(email)
   }
 
   @Post('/test/')
@@ -51,11 +46,5 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
     return this.usersService.updateProfile(id, updateUserDto)
-  }
-
-  @UseGuards(UserExistGuard)
-  @Delete(':email')
-  remove(@Param('email') email: string): Promise<User> {
-    return this.usersService.remove(email)
   }
 }

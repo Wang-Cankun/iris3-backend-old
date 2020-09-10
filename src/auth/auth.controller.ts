@@ -1,15 +1,13 @@
 import {
   Controller,
   Post,
-  HttpStatus,
-  HttpCode,
   Get,
   Body,
   Request,
   Param,
   UseGuards,
   Patch,
-  ParseIntPipe
+  Delete
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { UsersService } from 'src/users/users.service'
@@ -20,6 +18,9 @@ import { User } from 'src/users/entities/user.entity'
 import { ChangePasswordDto } from './dto/change-password.dto'
 import { UserRegisteredGuard } from 'src/users/guards/user-registered.guard'
 import { UserExistGuard } from 'src/users/guards/user-exist.guard'
+import { LoginDto } from './dto/login.dto'
+import { EmailDto } from './dto/email.dto'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +30,8 @@ export class AuthController {
   ) {}
 
   @Get('test')
-  public verifyEmail(@Param() params): any {
-    return '123'
+  public test(@Param() params): any {
+    return this.authService.createToken('flykun0620@gmail.com')
   }
 
   @UseGuards(LocalAuthGuard)
@@ -53,8 +54,27 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @UseGuards(UserExistGuard)
-  @Patch('/password')
+  @Patch('/password/change')
   updatePassword(@Body() changePasswordDto: ChangePasswordDto): Promise<User> {
     return this.authService.updatePassword(changePasswordDto)
+  }
+
+  @UseGuards(UserExistGuard)
+  @Post('/password/forgot')
+  setNewPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<User> {
+    return this.authService.setForgotPassword(resetPasswordDto)
+  }
+
+  @UseGuards(UserExistGuard)
+  @UseGuards(JwtAuthGuard)
+  @Delete('/delete')
+  remove(@Body() loginDto: LoginDto): Promise<User> {
+    return this.authService.removeAccount(loginDto)
+  }
+
+  @UseGuards(UserExistGuard)
+  @Post('/forgot')
+  sendResetEmail(@Body() emailDto: EmailDto): any {
+    return this.authService.resetPassword(emailDto.email)
   }
 }
