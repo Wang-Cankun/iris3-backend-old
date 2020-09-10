@@ -10,7 +10,6 @@ import {
   ParseIntPipe
 } from '@nestjs/common'
 import { UsersService } from './users.service'
-import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { ApiTags } from '@nestjs/swagger'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
@@ -18,6 +17,7 @@ import { User } from './entities/user.entity'
 import { UserExistGuard } from './guards/user-exist.guard'
 
 @ApiTags('users')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -29,16 +29,9 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: string): Promise<User> {
     return this.usersService.findOneById(id)
-  }
-
-  @UseGuards(UserExistGuard)
-  @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto)
   }
 
   @Post('/reset/:email')
@@ -51,17 +44,6 @@ export class UsersController {
     return this.usersService.test(updateUserDto)
   }
 
-  @UseGuards(JwtAuthGuard)
-  @UseGuards(UserExistGuard)
-  @Patch('/password/:id')
-  updatePassword(
-    @Param('id', ParseIntPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto
-  ): Promise<User> {
-    return this.usersService.updatePassword(id, updateUserDto)
-  }
-
-  @UseGuards(JwtAuthGuard)
   @UseGuards(UserExistGuard)
   @Patch(':id')
   updateProfile(
@@ -71,7 +53,6 @@ export class UsersController {
     return this.usersService.updateProfile(id, updateUserDto)
   }
 
-  @UseGuards(JwtAuthGuard)
   @UseGuards(UserExistGuard)
   @Delete(':email')
   remove(@Param('email') email: string): Promise<User> {

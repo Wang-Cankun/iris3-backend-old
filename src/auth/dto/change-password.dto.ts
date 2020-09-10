@@ -1,6 +1,5 @@
-export class ResetPasswordDto {
+export class ChangePasswordDto {
   readonly email: string
   readonly newPassword: string
-  readonly newPasswordToken: string
   readonly currentPassword: string
 }

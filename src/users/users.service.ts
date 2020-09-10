@@ -2,10 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { Job } from './entities/job.entity'
-import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import * as nodemailer from 'nodemailer'
-import * as bcrypt from 'bcrypt'
+import { Repository } from 'typeorm'
 
 // export type User = any
 export type Users = any
@@ -26,25 +25,6 @@ export class UsersService {
       const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       return re.test(email)
     } else return false
-  }
-
-  async hashPassword(plainPassword: string): Promise<string> {
-    // Set 10 as salt
-    const hashedPassword = await bcrypt.hash(plainPassword, 10)
-    return hashedPassword
-  }
-
-  async validatePassword(
-    plainPassword: string,
-    hashedPassword: string
-  ): Promise<boolean> {
-    // Set 10 as salt
-    // const hashedPassword = await this.hashPassword(plainPassword)
-    const isPasswordMatching = await bcrypt.compare(
-      plainPassword,
-      hashedPassword
-    )
-    return isPasswordMatching
   }
 
   findAll(): Promise<User[]> {
@@ -73,18 +53,6 @@ export class UsersService {
     return user
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const job = await Promise.all(
-      createUserDto.job.map((email) => this.preloadJobByName(email))
-    )
-    createUserDto.password = await this.hashPassword(createUserDto.password)
-    const user = this.userRepository.create({
-      ...createUserDto,
-      job
-    })
-    return this.userRepository.save(user)
-  }
-
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const job =
       updateUserDto.job &&
@@ -103,15 +71,6 @@ export class UsersService {
     return this.userRepository.save(user)
   }
 
-  async updatePassword(
-    id: string,
-    updateUserDto: UpdateUserDto
-  ): Promise<User> {
-    const userFromDb = await this.findOneById(id)
-    userFromDb.password = await this.hashPassword(updateUserDto.password)
-    return this.userRepository.save(userFromDb)
-  }
-
   async updateProfile(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const userFromDb = await this.findOneById(id)
     userFromDb.firstName = updateUserDto.firstName
@@ -121,7 +80,7 @@ export class UsersService {
     return this.userRepository.save(userFromDb)
   }
 
-  private async preloadJobByName(id: string): Promise<Job> {
+  async preloadJobByName(id: string): Promise<Job> {
     const existingJob = await this.jobRepository.findOne(id)
     if (existingJob) {
       return existingJob
@@ -134,21 +93,13 @@ export class UsersService {
     return this.userRepository.remove(user)
   }
 
-  async queryUserInfo(username: string): Promise<User | undefined> {
-    const { ...result } = await this.users.find(
-      (user) => user.username === username
-    )
-    return result
-  }
-
   async test(updateUserDto: UpdateUserDto): Promise<any> {
     const user = await this.findOneByEmail(updateUserDto.email)
 
-    console.log(
-      await this.validatePassword(updateUserDto.password, user.password)
-    )
+    console.log(user)
     return 1
   }
+
   sendEmailVerification(email: string): void {
     const content =
       `<table class='body' style='border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #f6f6f6;' border='0' cellspacing='0' cellpadding='0'>

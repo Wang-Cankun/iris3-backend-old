@@ -11,7 +11,7 @@ import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 
 @Injectable()
-export class UserExistGuard implements CanActivate {
+export class UserRegisteredGuard implements CanActivate {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
@@ -19,9 +19,9 @@ export class UserExistGuard implements CanActivate {
 
   async validate(email: string): Promise<boolean> {
     const user = await this.userRepository.count({ email: email })
-    if (!user) {
+    if (user) {
       throw new HttpException(
-        `Email ${email} does not exist`,
+        `Email ${email} already registered`,
         HttpStatus.CONFLICT
       )
     }

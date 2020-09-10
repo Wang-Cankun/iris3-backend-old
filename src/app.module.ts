@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module'
 import { UploadModule } from './upload/upload.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config'
+import { EmailModule } from './email/email.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -21,7 +22,8 @@ import { ConfigModule } from '@nestjs/config'
     }),
     AuthModule,
     UsersModule,
-    UploadModule
+    UploadModule,
+    EmailModule
   ],
   controllers: [AppController],
   providers: [AppService]
