@@ -40,11 +40,11 @@ export class UsersController {
   }
 
   @UseGuards(UserExistGuard)
-  @Patch(':id')
+  @Patch('/update/:email')
   updateProfile(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('email') email: string,
     @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
-    return this.usersService.updateProfile(id, updateUserDto)
+    return this.usersService.updateProfile(email, updateUserDto)
   }
 }
