@@ -52,9 +52,8 @@ export class AuthController {
     return this.authService.createUser(createUserDto)
   }
 
-  @UseGuards(JwtAuthGuard)
   @UseGuards(UserExistGuard)
-  @Patch('/password/change')
+  @Post('/password/change')
   updatePassword(@Body() changePasswordDto: ChangePasswordDto): Promise<User> {
     return this.authService.updatePassword(changePasswordDto)
   }
