@@ -1,0 +1,1 @@
+This folder is used as shared folder with docker containers.
