@@ -6,6 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true })
   const options = new DocumentBuilder()
     .setTitle('IRIS3 API')
+    .setBasePath('/iris3/api/')
     .setDescription('IRIS3 API application')
     .setVersion('1.0')
     .build()
