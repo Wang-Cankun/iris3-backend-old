@@ -65,6 +65,14 @@ export class DockerService {
       })
     })
   }
+  async streamToString(stream) {
+    const chunks = []
+    return new Promise((resolve, reject) => {
+      stream.on('data', (chunk) => chunks.push(chunk))
+      stream.on('error', reject)
+      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    })
+  }
 
   async test(param) {
     const options = {
@@ -77,7 +85,26 @@ export class DockerService {
     return new Promise((resolve, reject) => {
       this.container.attach(options, async (err, stream) => {
         if (err) return reject(err)
-        stream.write('R\ndate()\n')
+        stream.write('R\nsetwd("/iris3")\n')
+        stream.write('date()\n')
+        resolve('done')
+      })
+    })
+  }
+
+  async runCmd(cmd) {
+    const options = {
+      stream: true,
+      stdin: true,
+      stdout: true,
+      stderr: true
+    }
+    return new Promise((resolve, reject) => {
+      this.container.attach(options, async (err, stream) => {
+        if (err) return reject(err)
+        stream.write('R\nsetwd("/iris3")\n')
+        stream.write(cmd)
+        stream.write('date()\n')
         resolve('done')
       })
     })
