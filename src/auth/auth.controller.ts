@@ -7,12 +7,13 @@ import {
   Param,
   UseGuards,
   Patch,
+  Req,
   Delete
 } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
 import { UsersService } from 'src/users/users.service'
-import { JwtAuthGuard } from './jwt-auth.guard'
-import { LocalAuthGuard } from './local-auth.guard'
+import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { User } from 'src/users/entities/user.entity'
 import { ChangePasswordDto } from './dto/change-password.dto'
@@ -21,7 +22,12 @@ import { UserExistGuard } from 'src/users/guards/user-exist.guard'
 import { LoginDto } from './dto/login.dto'
 import { EmailDto } from './dto/email.dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { AuthGuard } from '@nestjs/passport'
+import { LocalAuthGuard } from './guards/local-auth.guard'
+import { JwtPayload } from './decorators/jwt-payload.decorator'
+import { JwtPayloadDto } from './dto/jwt-payload.dto'
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -41,9 +47,25 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  async logout(@Request() req) {
+    return 'logout to be add'
+  }
+
+  @Get('/google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {}
+
+  @Get('/google/redirect')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return req.user
+  getProfile(@JwtPayload() payload: JwtPayloadDto): JwtPayloadDto {
+    return payload
   }
 
   @UseGuards(UserRegisteredGuard)
@@ -53,6 +75,7 @@ export class AuthController {
   }
 
   @UseGuards(UserExistGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/password/change')
   updatePassword(@Body() changePasswordDto: ChangePasswordDto): Promise<User> {
     return this.authService.updatePassword(changePasswordDto)

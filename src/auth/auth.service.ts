@@ -10,9 +10,9 @@ import * as bcrypt from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
 import { Job } from 'src/users/entities/job.entity'
 import { LoginDto } from './dto/login.dto'
-import { TokenDto } from './dto/token.dto'
 import { EmailService } from 'src/email/email.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { TokenDto } from './dto/token.dto'
 @Injectable()
 export class AuthService {
   constructor(
@@ -68,13 +68,24 @@ export class AuthService {
     throw new HttpException('Wrong password', HttpStatus.UNAUTHORIZED)
   }
 
-  async login(user: User): Promise<unknown> {
+  async login(user: User): Promise<any> {
     const payload = {
-      info: user.email
+      email: user.email
     }
     return {
-      info: user.email,
+      email: user.email,
       access_token: this.jwtService.sign(payload)
+    }
+  }
+
+  googleLogin(req) {
+    if (!req.user) {
+      return 'No user from google'
+    }
+
+    return {
+      message: 'User information from google',
+      user: req.user
     }
   }
 

@@ -2,33 +2,44 @@ import { Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { LocalStrategy } from './local.strategy'
 import { JwtStrategy } from './jwt.strategy'
+import { GoogleStrategy } from './google.strategy'
 import { UsersModule } from '../users/users.module'
 import { PassportModule } from '@nestjs/passport'
 import { JwtModule } from '@nestjs/jwt'
-import { jwtConstants } from './constants'
 import { AuthController } from './auth.controller'
 import { UsersService } from 'src/users/users.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/users/entities/user.entity'
 import { Job } from 'src/users/entities/job.entity'
 import { EmailService } from 'src/email/email.service'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Job]),
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60h' }
-    })
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRATION_TIME')
+          }
+        }
+      },
+      inject: [ConfigService]
+    }),
+    ConfigModule
   ],
   providers: [
     AuthService,
     UsersService,
     EmailService,
     LocalStrategy,
-    JwtStrategy
+    JwtStrategy,
+    GoogleStrategy
   ],
   exports: [AuthService],
   controllers: [AuthController]

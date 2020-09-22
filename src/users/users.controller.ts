@@ -7,14 +7,15 @@ import {
   Patch,
   Post,
   UseGuards,
-  ParseIntPipe
+  Request
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { ApiTags } from '@nestjs/swagger'
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { User } from './entities/user.entity'
 import { UserExistGuard } from './guards/user-exist.guard'
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
+import { JwtPayload } from 'src/auth/decorators/jwt-payload.decorator'
 
 @ApiTags('users')
 @UseGuards(JwtAuthGuard)
@@ -22,6 +23,7 @@ import { UserExistGuard } from './guards/user-exist.guard'
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // Delete this route later
   @Get()
   async findAll(): Promise<User[]> {
     // const { limit, offset } = paginationQuery;
@@ -29,8 +31,9 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
-  @Get(':email')
-  findOne(@Param('email') email: string): Promise<User> {
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  findOne(@JwtPayload('email') email: string): Promise<User> {
     return this.usersService.findOneByEmail(email)
   }
 
@@ -40,9 +43,9 @@ export class UsersController {
   }
 
   @UseGuards(UserExistGuard)
-  @Patch('/update/:email')
+  @Patch('/update/')
   updateProfile(
-    @Param('email') email: string,
+    @JwtPayload('email') email: string,
     @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
     return this.usersService.updateProfile(email, updateUserDto)
