@@ -13,13 +13,15 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { BullModule } from '@nestjs/bull'
 import { QueueModule } from './queue/queue.module'
+import { EventsModule } from './events/events.module'
 import * as Joi from '@hapi/joi'
+import { MulterModule } from '@nestjs/platform-express'
+import { JobModule } from './job/job.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'tmp'),
-      exclude: ['/iris3/api*']
+    MulterModule.register({
+      dest: '/tmp'
     }),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -61,7 +63,9 @@ import * as Joi from '@hapi/joi'
     EmailModule,
     DockerModule,
     CommandModule,
-    QueueModule
+    QueueModule,
+    EventsModule,
+    JobModule
   ],
   controllers: [AppController],
   providers: [AppService]

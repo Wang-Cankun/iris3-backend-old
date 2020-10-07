@@ -1,5 +1,3 @@
-import { Body, Controller, Post } from '@nestjs/common'
-import { CommandService } from './command.service'
 import {
   MessageBody,
   SubscribeMessage,
@@ -12,21 +10,15 @@ import { map } from 'rxjs/operators'
 import { Server } from 'socket.io'
 
 @WebSocketGateway()
-export class CommandController {
-  constructor(private readonly commandService: CommandService) {}
-
+export class EventsGateway {
   @WebSocketServer()
   server: Server
 
-  @SubscribeMessage('preprocess')
-  async preprocess(@Body() params) {
-    console.log(params)
-    this.commandService.runPreprocessing(params)
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(Date())
-      }, 4500)
-    })
+  @SubscribeMessage('events')
+  findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
+    return from([1, 2, 3, 4]).pipe(
+      map((item) => ({ event: 'events', data: item }))
+    )
   }
 
   @SubscribeMessage('submit')
@@ -36,5 +28,10 @@ export class CommandController {
         resolve(Date())
       }, 4000)
     })
+  }
+
+  @SubscribeMessage('identity')
+  async identity(@MessageBody() data: number): Promise<number> {
+    return data
   }
 }

@@ -1,12 +1,13 @@
+import { Job } from 'src/job/entities/job.entity'
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   JoinTable,
   ManyToMany,
-  CreateDateColumn
+  CreateDateColumn,
+  PrimaryColumn
 } from 'typeorm'
-import { Job } from './job.entity'
 
 @Entity()
 export class User {

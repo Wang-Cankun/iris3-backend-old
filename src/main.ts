@@ -1,8 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
-import * as express from 'express'
-import { join } from 'path'
 import * as compression from 'compression'
 import { ConfigService } from '@nestjs/config'
 async function bootstrap() {
@@ -29,7 +27,7 @@ async function bootstrap() {
   SwaggerModule.setup('/iris3/api/docs', app, document)
 
   // Serve a static folder on ./tmp
-  app.use(express.static(join(process.cwd(), '../tmp')))
+  // app.use(express.static(join(process.cwd(), '../tmp')))
 
   await app.listen(port)
   console.log(`Application is running on: ${await app.getUrl()}`)

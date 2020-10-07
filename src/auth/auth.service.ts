@@ -8,11 +8,11 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import * as bcrypt from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
-import { Job } from 'src/users/entities/job.entity'
 import { LoginDto } from './dto/login.dto'
 import { EmailService } from 'src/email/email.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
 import { TokenDto } from './dto/token.dto'
+import { Job } from 'src/job/entities/job.entity'
 @Injectable()
 export class AuthService {
   constructor(

@@ -4,7 +4,7 @@ import { CommandController } from './command.controller'
 import { DockerService } from 'src/docker/docker.service'
 
 @Module({
-  providers: [CommandService, DockerService],
-  controllers: [CommandController]
+  providers: [CommandService, DockerService, CommandController],
+  exports: [CommandService]
 })
 export class CommandModule {}

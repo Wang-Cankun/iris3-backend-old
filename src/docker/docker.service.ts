@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { compareSync } from 'bcrypt'
 import * as Docker from 'dockerode'
 
 @Injectable()
@@ -9,7 +10,6 @@ export class DockerService {
   private readonly CTRL_Q = '\u0011\n'
   constructor() {
     this.docker = new Docker()
-    this.container = this.docker.getContainer('iris3-workflow-env')
   }
 
   /**
@@ -93,14 +93,16 @@ export class DockerService {
   }
 
   async runCmd(cmd) {
+    const container = this.docker.getContainer('iris3-workflow-env')
     const options = {
       stream: true,
       stdin: true,
       stdout: true,
       stderr: true
     }
+
     return new Promise((resolve, reject) => {
-      this.container.attach(options, async (err, stream) => {
+      container.attach(options, async (err, stream) => {
         if (err) return reject(err)
         stream.write('R\nsetwd("/iris3")\n')
         stream.write(cmd)
