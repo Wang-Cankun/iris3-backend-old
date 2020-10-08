@@ -4,11 +4,14 @@ suppressPackageStartupMessages(library(hdf5r))
 suppressPackageStartupMessages(library(jsonlite))
 suppressPackageStartupMessages(library(ggplot2))
 library(patchwork)
+library(fst)
+library(tidyverse)
 
 # Global variable for each docker session
 raw_expr_data <- NULL
 obj <- NULL
-filename <- 'Yan_2013_expression.csv'
+filename <- 'Zeisel_expression.fst'
+meta <- read.csv('Zeisel_index_label.csv')
 ident_idx <- 1
 
 #' Echo the parameter that was sent in
@@ -54,14 +57,16 @@ function(jobid){
 # @param filename
 # @param type Upload expression file type, CellGene, 10X h5, 10X folder
 #' @post /load
-function(req,filename,min_cells=1,min_genes=200, nVariableFeatures=2000){
-  raw_expr_data <<- read.csv(filename,row.names = 1)
+function(req,filename,min_cells=1,min_genes=200, nVariableFeatures=3000){
+  raw_expr_data <<- read.fst(filename)
+  rownames(raw_expr_data) <- NULL
+  raw_expr_data <- column_to_rownames(raw_expr_data, "X1")
   raw_obj <- CreateSeuratObject(raw_expr_data)
   obj <<- CreateSeuratObject(raw_expr_data,min.cells = min_cells, min.features = min_genes)
   empty_ident <- as.factor(obj$orig.ident)
   levels(empty_ident) <- rep("empty.ident",length(levels(empty_ident)))
   obj <<- AddMetaData(obj, metadata = empty_ident,col.name = "empty.ident")
-  Idents(obj) <<- obj$orig.ident
+  Idents(obj) <- obj$orig.ident
   obj[["percent.mt"]] <<- PercentageFeatureSet(obj, pattern = "^MT-")
   rb.genes <- rownames(obj)[grep("^RP[SL]",rownames(obj))]
   percent.ribo <- Matrix::colSums(obj[rb.genes,])/Matrix::colSums(obj)*100
@@ -115,7 +120,9 @@ function(req, nPCs=20, resolution=0.2){
   resolution <- as.numeric(resolution)
   obj <<- NormalizeData(obj,verbose = F)
   obj <<- ScaleData(obj, features = rownames(obj),verbose = F)
-  variable_genes <- VariableFeatures(obj,verbose = F)
+  variable_genes <- VariableFeatures(obj)
+  obj <<- AddMetaData(obj, meta$Label, col.name = "cell_type")
+  #Idents(obj) <- obj$cell_type
   #print(obj)
   if(nPCs > ncol(obj)){
     nPC <- ncol(obj)
@@ -133,7 +140,7 @@ function(req, nPCs=20, resolution=0.2){
 #' @get /qcplot
 #' @serializer png list(width = 800, height =500)
 function(){
-  Idents(obj) <- obj@meta.data[,1]
+  Idents(obj) <- obj@meta.data$empty.ident
   plot <- VlnPlot(obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
   return(print(plot))
 }
