@@ -92,6 +92,7 @@ export class QueueController {
       .get('http://localhost:8000/idents')
       .toPromise()
       .then((response) => response.data)
+
     return result
   }
 
@@ -103,8 +104,28 @@ export class QueueController {
 
   @Post('qcplot')
   async qcPlot() {
-    console.log('Add plotQc')
     const jobInfo = await this.jobQueue.add('qcplot', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('qcplot1')
+  async qcPlot1() {
+    const jobInfo = await this.jobQueue.add('qcplot1', { jobid: 1 })
+    return jobInfo
+  }
+  @Post('qcplot2')
+  async qcPlot2() {
+    const jobInfo = await this.jobQueue.add('qcplot2', { jobid: 1 })
+    return jobInfo
+  }
+  @Post('qcplot3')
+  async qcPlot3() {
+    const jobInfo = await this.jobQueue.add('qcplot3', { jobid: 1 })
+    return jobInfo
+  }
+  @Post('qcplot4')
+  async qcPlot4() {
+    const jobInfo = await this.jobQueue.add('qcplot4', { jobid: 1 })
     return jobInfo
   }
 
@@ -114,6 +135,11 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('var-genes-list')
+  async varGenesList() {
+    const jobInfo = await this.jobQueue.add('varGenesList', { jobid: 1 })
+    return jobInfo
+  }
   @Post('umap-cluster')
   async umapClusterPlot() {
     const jobInfo = await this.jobQueue.add('umapClusterPlot', { jobid: 1 })

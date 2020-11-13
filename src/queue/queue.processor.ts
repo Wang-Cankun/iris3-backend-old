@@ -9,6 +9,7 @@ import {
 import { HttpService, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Job, JobCounts, Queue } from 'bull'
+import { response } from 'express'
 import moveFile from 'move-file'
 import { Job as JobEntity } from 'src/job/entities/job.entity'
 import { JobService } from 'src/job/job.service'
@@ -109,7 +110,6 @@ export class QueueProcessor {
       .then((response) => response.data)
     return result
   }
-
   @Process('qcplot')
   async qcplot(job: Job) {
     const result = await this.httpService
@@ -124,7 +124,63 @@ export class QueueProcessor {
       )
     return result
   }
+  @Process('qcplot1')
+  async qcplot1(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/qcplot1', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
 
+  @Process('qcplot2')
+  async qcplot2(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/qcplot2', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+  @Process('qcplot3')
+  async qcplot3(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/qcplot3', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+  @Process('qcplot4')
+  async qcplot4(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/qcplot4', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
   @Process('varGenesPlot')
   async varsGenesPlot(job: Job) {
     const result = await this.httpService
@@ -140,6 +196,14 @@ export class QueueProcessor {
     return result
   }
 
+  @Process('varGenesList')
+  async varGenesList(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/var-genes-list')
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
   @Process('umapClusterPlot')
   async umapClusterPlot(job: Job) {
     const result = await this.httpService
