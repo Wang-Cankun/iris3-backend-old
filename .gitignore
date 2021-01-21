@@ -1,6 +1,13 @@
 # Env
 *.env
 tmp
+*.rdata
+*.rds
+*.rData
+*.tsv.gz*
+*.h5
+pbmc_granulocyte_sorted_10k_per_barcode_metrics.csv
+
 
 # compiled output
 /dist

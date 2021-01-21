@@ -128,7 +128,16 @@ export class QueueController {
     const jobInfo = await this.jobQueue.add('qcplot4', { jobid: 1 })
     return jobInfo
   }
-
+  @Post('qcplot5')
+  async qcPlot5() {
+    const jobInfo = await this.jobQueue.add('qcplot5', { jobid: 1 })
+    return jobInfo
+  }
+  @Post('qcplot6')
+  async qcPlot6() {
+    const jobInfo = await this.jobQueue.add('qcplot6', { jobid: 1 })
+    return jobInfo
+  }
   @Post('var-genes-plot')
   async varGenesPlot() {
     const jobInfo = await this.jobQueue.add('varGenesPlot', { jobid: 1 })
@@ -140,9 +149,51 @@ export class QueueController {
     const jobInfo = await this.jobQueue.add('varGenesList', { jobid: 1 })
     return jobInfo
   }
+
+  @Post('combine-regulon')
+  async combineRegulon() {
+    const jobInfo = await this.jobQueue.add('combineRegulon', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('deg')
+  async deg(@Body() body) {
+    console.log('QueueController -> deg -> body', body)
+    const jobInfo = this.jobQueue.add('deg', body)
+    return jobInfo
+  }
+
+  @Post('pie-meta')
+  async pieMetaPlot() {
+    console.log('pie meta plot')
+    const jobInfo = await this.jobQueue.add('pieMetaPlot', { jobid: 1 })
+    return jobInfo
+  }
   @Post('umap-cluster')
   async umapClusterPlot() {
+    console.log('umap plot')
     const jobInfo = await this.jobQueue.add('umapClusterPlot', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('umap-rna')
+  async umapRNAPlot() {
+    console.log('umap plot')
+    const jobInfo = await this.jobQueue.add('umapRNAPlot', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('umap-atac')
+  async umapATACPlot() {
+    console.log('umap plot')
+    const jobInfo = await this.jobQueue.add('umapATACPlot', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('umap-atac')
+  async umapIntegratedPlot() {
+    console.log('umap plot')
+    const jobInfo = await this.jobQueue.add('umapIntegratedPlot', { jobid: 1 })
     return jobInfo
   }
 
@@ -159,6 +210,11 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('feature-gene')
+  async featureGenePlot(@Body() body) {
+    const jobInfo = await this.jobQueue.add('featureGenePlot', body)
+    return jobInfo
+  }
   @Post('bicluster')
   async runBicluster(@Body() body) {
     const jobInfo = await this.jobQueue.add('bicluster', body)

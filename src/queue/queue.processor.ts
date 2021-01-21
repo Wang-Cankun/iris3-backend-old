@@ -181,10 +181,53 @@ export class QueueProcessor {
       )
     return result
   }
+  @Process('qcplot5')
+  async qcplot5(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/qcplot5', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+  @Process('qcplot6')
+  async qcplot6(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/qcplot6', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
   @Process('varGenesPlot')
   async varsGenesPlot(job: Job) {
     const result = await this.httpService
       .get('http://localhost:8000/var-genes-plot', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+
+  @Process('pieMetaPlot')
+  async pieMetaPlot(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/pie-meta', {
         responseType: 'arraybuffer'
       })
       .toPromise()
@@ -204,10 +247,74 @@ export class QueueProcessor {
       .then((res) => res.data)
     return result
   }
+
+  @Process('combineRegulon')
+  async combineRegulon(job: Job) {
+    console.log('running combine regulon')
+    const result = await this.httpService
+      .get('http://localhost:8000/combine-regulon')
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
+
+  @Process('deg')
+  async deg(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/deg', job.data)
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
   @Process('umapClusterPlot')
   async umapClusterPlot(job: Job) {
     const result = await this.httpService
       .get('http://localhost:8000/umap-cluster', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+
+  @Process('umapRNAPlot')
+  async umapRNAPlot(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/umap-rna', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+
+  @Process('umapATACPlot')
+  async umapATACPlot(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/umap-atac', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+
+  @Process('umapIntegratedPlot')
+  async umapIntegratedPlot(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/umap-integrated', {
         responseType: 'arraybuffer'
       })
       .toPromise()
@@ -238,6 +345,21 @@ export class QueueProcessor {
   async violinGenePlot(job: Job) {
     const result = await this.httpService
       .post('http://localhost:8000/violin-gene', job.data, {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+
+  @Process('featureGenePlot')
+  async featureGenePlot(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/feature-gene', job.data, {
         responseType: 'arraybuffer'
       })
       .toPromise()

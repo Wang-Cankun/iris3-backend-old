@@ -15,3 +15,5 @@ docker stop iris3-plumber-api
 
 docker run --name iris3-redis -v c:/Users/flyku/Documents/GitHub/iris3-backend/tmp:/data -d redis redis-server --appendonly yes
 
+
+docker run -d -p 8080:8080 -v c:\Users\flyku\Desktop\meme\:/home/meme memesuite/memesuite
