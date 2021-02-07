@@ -5,12 +5,12 @@ suppressPackageStartupMessages(library(jsonlite))
 suppressPackageStartupMessages(library(ggplot2))
 library(patchwork)
 library(fst)
-library(dplyr)
+library(tidyverse)
 library(tibble)
 library(scales)
 library(Polychrome)
 library(RColorBrewer)
-library(ComplexHeatmap)
+#library(ComplexHeatmap)
 # Global variable for each docker session
 raw_expr_data <- NULL
 obj <- NULL
@@ -305,9 +305,12 @@ function(req, nPCs=20, resolution=0.5){
 }
 
 #' Get Variable genes list
-#' @get /combine-regulon
-function(req){
+#' @post /combine-regulon
+function(req, jobid){
   print('return combine regulons')
+  #jobid=2020041684528
+  combine_regulon=read.table(url(paste0("https://bmbl.bmi.osumc.edu/iris3/data/",jobid,"/",jobid,"_combine_regulon.txt")), header = T)
+  print(head(combine_regulon))
   return(list(
     list(combine_regulon)
   ))
@@ -339,6 +342,7 @@ function(req, gene="Gad1", split="sex"){
   return(print(plot))
 }
 
+
 #' Plot gene expression in feature plot
 #' @post /feature-gene
 #' @serializer png list(width = 600, height =600)
@@ -346,5 +350,156 @@ function(req, gene="Gad1"){
   Idents(obj) <- obj@meta.data[,ident_idx]
   plot <- FeaturePlot(obj, gene)
   return(print(plot))
+}
+
+
+#' Plot dot plot
+#' @post /dot-plot
+#' @serializer png list(width = 1000, height =750)
+function(req, top="3"){
+  #ident_idx=9
+  #cluster_markers <- FindAllMarkers(obj,logfc.threshold = 0.7)
+  #write.csv(cluster_markers,"cluster_markers.csv")
+  #top = 3
+  top = as.numeric(top)
+  m1 <- read_csv("cluster_markers.csv")%>%
+    group_by(cluster) %>%
+    top_n(top) %>%
+    pull(gene) %>%
+    unique()
+    
+  #idx <- which(colnames(obj@meta.data) == split)
+  #Idents(obj) <- obj@meta.data[,ident_idx]
+  plot <- DotPlot(obj, features = m1) + RotatedAxis()
+
+  return(print(plot))
+}
+
+
+#' Plot dot plot
+#' @post /annotate-cell-type
+function(req){
+  #ident_idx=9
+  #cluster_markers <- FindAllMarkers(obj,logfc.threshold = 0.7)
+  #write.csv(cluster_markers,"cluster_markers.csv")
+  print('run cell type annotation')
+  meta <- read.csv('Zeisel_index_label.csv')
+  obj <<- AddMetaData(obj, meta$Label, col.name = "annotate_cell_type")
+  Sys.sleep(5)
+  return(list(
+    n_annotate_cell_type = length(levels(as.factor(obj$annotate_cell_type))),
+    annotate_cell_type=data.frame(annotate_cell_type = levels(as.factor(obj$annotate_cell_type)))
+    
+  ))
+  
+}
+
+#' @post /transfer-cell-type
+function(req){
+  #ident_idx=9
+  #cluster_markers <- FindAllMarkers(obj,logfc.threshold = 0.7)
+  #write.csv(cluster_markers,"cluster_markers.csv")
+  print('run cell type transfer')
+  Sys.sleep(5)
+  meta <- read.table('query_example_cell_label.txt',sep = "\t",header = T)
+  meta <- meta[match(colnames(obj), meta$cell_name),]
+  obj <<- AddMetaData(obj, meta$label, col.name = "transfer_cell_type")
+  
+  return(list(
+    n_transfer_cell_type = length(levels(as.factor(obj$transfer_cell_type))),
+    transfer_cell_type=data.frame(transfer_cell_type = levels(as.factor(obj$transfer_cell_type)))
+    
+  ))
+  
+}
+
+
+#' @post /run-v1
+function(req, jobid="2020041684528"){
+  #ident_idx=9
+  #cluster_markers <- FindAllMarkers(obj,logfc.threshold = 0.7)
+  #write.csv(cluster_markers,"cluster_markers.csv")
+  
+  url_data <- httr::GET(paste0("https://bmbl.bmi.osumc.edu/iris3/data/",jobid))
+  url_data <- httr::content(url_data)
+  is_job_exist <- str_detect(url_data,"location.href")
+  
+  if(!is_job_exist) {
+    current_wd <- getwd()
+    wd=paste0("C:/Users/flyku/Documents/GitHub/iris3-backend/plumber/",jobid)
+    dir.create(wd)
+    setwd(wd)
+    
+    #wd=paste0("/var/www/html/iris3/data/",jobid)
+    
+    cat(paste0("#!/bin/bash\necho 'test run ",jobid,"'\nsleep 10"), file="qsub2.sh",sep = "\n") 
+    label_use_predict <- "2"
+    
+    
+    cat(paste0("#!/bin/bash"), file="qsub.sh",sep = "\n") 
+    cat(paste0("wd=",wd), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("exp_file=matrix.mtx.gz"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("label_file=1"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("gene_module_file="), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("jobid=",jobid), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("motif_min_length=12"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("motif_max_length=12"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("perl /var/www/html/iris3/program/prepare_email1.pl $jobid"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/genefilter.R $jobid $wd$exp_file , $label_file , No 0.8 10 5000 ",label_use_predict," No"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("echo gene_module_detection > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/qubic2/qubic -i $wd$jobid\\_filtered_expression.txt -q 0.06 -c 1.0 -k 20 -o 500 -f 0.7 "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("for file in *blocks"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("do"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("grep Conds $file |cut -d ':' -f2 >'$(basename $jobid_blocks.conds.txt)'"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("done"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("for file in *blocks"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("do"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("grep Genes $file |cut -d ':' -f2 >'$(basename $jobid_blocks.gene.txt)'"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("done"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/ari_score.R $label_file $jobid , ",label_use_predict," "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("echo gene_module_assignment > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/cts_gene_list.R $wd $jobid 1000   "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("echo motif_finding_and_comparison > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/get_motif.sh $wd $motif_min_length $motif_max_length 1"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/convert_meme.R $wd $motif_min_length"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/get_motif.sh $wd $motif_min_length $motif_max_length 0"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("wait"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("cd $wd"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/prepare_bbc.R $jobid $motif_min_length"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("mkdir tomtom"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("mkdir logo_tmp"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("mkdir logo"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("mkdir regulon_id"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/get_logo.sh $wd"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/get_tomtom.sh $wd"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("echo active_regulon_determination > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/merge_tomtom.R $wd $jobid $motif_min_length"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("echo regulon_inference > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/sort_regulon.R $wd $jobid"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/get_atac_overlap.sh $wd"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/prepare_heatmap.R $wd $jobid ",label_use_predict," "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/get_alternative_regulon.R $jobid"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/generate_rss_scatter.R $jobid"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/process_tomtom_result.R $jobid"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("mkdir json"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/build_clustergrammar.sh $wd $jobid ",label_use_predict," "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("zip -R $wd$jobid '*.regulon_gene_id.txt' '*.regulon_gene_symbol.txt' '*.regulon_rank.txt' '*_silh.txt' '*umap_embeddings.txt' '*.regulon_activity_score.txt' '*_cell_label.txt' '*.blocks' '*_blocks.conds.txt' '*_blocks.gene.txt' '*_filtered_expression.txt' '*_gene_id_name.txt' '*_marker_genes.txt' 'cell_cluster_unique_diffrenetially_expressed_genes.txt' '*_combine_regulon.txt'"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("perl /var/www/html/iris3/program/prepare_email.pl $jobid"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("echo 'finish'> done"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("chmod -R 777 ."), file="qsub.sh",append = T,sep = "\n") 
+    
+    
+    message('Start IRIS3 v1')
+    
+    
+    system("bash qsub2.sh &")
+    
+    setwd(current_wd)
+    return(jobid)
+  } else {
+    return (F)
+  }
+ 
+  
 }
 

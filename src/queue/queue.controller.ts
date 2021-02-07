@@ -72,8 +72,25 @@ export class QueueController {
 
   @Post('cluster')
   async cluster(@Body() body) {
-    console.log(body)
     const jobInfo = this.jobQueue.add('cluster', body)
+    return jobInfo
+  }
+
+  @Post('annotate-cell-type')
+  async annotateCellType(@Body() body) {
+    const jobInfo = this.jobQueue.add('annotate-cell-type', body)
+    return jobInfo
+  }
+  @Post('transfer-cell-type')
+  async transferCellType(@Body() body) {
+    const jobInfo = this.jobQueue.add('transfer-cell-type', body)
+    return jobInfo
+  }
+
+  @Post('run-v1')
+  async runV1(@Body() body) {
+    console.log(body)
+    const jobInfo = this.jobQueue.add('run-v1', body)
     return jobInfo
   }
 
@@ -151,8 +168,9 @@ export class QueueController {
   }
 
   @Post('combine-regulon')
-  async combineRegulon() {
-    const jobInfo = await this.jobQueue.add('combineRegulon', { jobid: 1 })
+  async combineRegulon(@Body() body) {
+    console.log(body)
+    const jobInfo = await this.jobQueue.add('combineRegulon', body)
     return jobInfo
   }
 
@@ -215,6 +233,13 @@ export class QueueController {
     const jobInfo = await this.jobQueue.add('featureGenePlot', body)
     return jobInfo
   }
+
+  @Post('dot-plot')
+  async dotPlot(@Body() body) {
+    const jobInfo = await this.jobQueue.add('dotPlot', body)
+    return jobInfo
+  }
+
   @Post('bicluster')
   async runBicluster(@Body() body) {
     const jobInfo = await this.jobQueue.add('bicluster', body)

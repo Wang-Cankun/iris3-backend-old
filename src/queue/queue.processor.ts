@@ -110,6 +110,35 @@ export class QueueProcessor {
       .then((response) => response.data)
     return result
   }
+
+  @Process('transfer-cell-type')
+  async transferCellType(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/transfer-cell-type', job.data)
+      .toPromise()
+      .then((response) => response.data)
+    return result
+  }
+
+  @Process('run-v1')
+  async runV1(job: Job) {
+    console.log(job.data)
+    const result = await this.httpService
+      .post('http://localhost:8000/run-v1', job.data)
+      .toPromise()
+      .then((response) => response.data)
+    return result
+  }
+
+  @Process('annotate-cell-type')
+  async annotateCellType(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/annotate-cell-type', job.data)
+      .toPromise()
+      .then((response) => response.data)
+    return result
+  }
+
   @Process('qcplot')
   async qcplot(job: Job) {
     const result = await this.httpService
@@ -252,7 +281,7 @@ export class QueueProcessor {
   async combineRegulon(job: Job) {
     console.log('running combine regulon')
     const result = await this.httpService
-      .get('http://localhost:8000/combine-regulon')
+      .post('http://localhost:8000/combine-regulon', job.data)
       .toPromise()
       .then((res) => res.data)
     return result
@@ -360,6 +389,20 @@ export class QueueProcessor {
   async featureGenePlot(job: Job) {
     const result = await this.httpService
       .post('http://localhost:8000/feature-gene', job.data, {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then(
+        (response) =>
+          'data:image/png;base64,' +
+          Buffer.from(response.data, 'binary').toString('base64')
+      )
+    return result
+  }
+  @Process('dotPlot')
+  async dotPlot(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/dot-plot', job.data, {
         responseType: 'arraybuffer'
       })
       .toPromise()
