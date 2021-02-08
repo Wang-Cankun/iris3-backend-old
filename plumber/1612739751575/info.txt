@@ -1,0 +1,15 @@
+is_load_exp,0
+k_arg,20
+f_arg,0.7
+o_arg,500
+resolution_seurat,0.5
+n_variable_features,3000
+n_pca,20
+label_use_predict,2
+expfile,Zeisel_expression.csv
+labelfile,Zeisel_index_label.csv
+is_c,
+promoter_arg,1000
+bic_inference,2
+gene_module_file,
+is_imputation,No

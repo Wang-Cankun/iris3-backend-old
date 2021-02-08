@@ -18,7 +18,7 @@ variable_genes <- NULL
 filename <- 'Zeisel_expression.fst'
 meta <- read.csv('Zeisel_index_label.csv')
 combine_regulon <- read.table("2020041684528_combine_regulon.txt", sep = "\t", header = T)
-ident_idx <- 1
+ident_idx <- 7
 
 
 
@@ -30,6 +30,10 @@ percentMt=5
 removeRibosome=FALSE
 nPCs=20
 resolution=0.5
+k_arg=20
+f_arg=0.7
+o_arg=500
+promoter_arg=1000
 
 source("functions.R")
 
@@ -178,6 +182,7 @@ function(){
 #' @serializer png list(width = 500, height =500)
 function(){
   Idents(obj) <- obj@meta.data$empty_ident
+  message(paste0("ident_idx:",ident_idx))
   plot <- VlnPlot(obj, features = c("nFeature_RNA"), ncol = 1)
   return(print(plot))
 }
@@ -321,7 +326,7 @@ function(req, jobid){
 #' @serializer png list(width = 600, height =600)
 function(req, gene="Gad1"){
   Idents(obj) <- obj@meta.data[,ident_idx]
-  plot <- FeaturePlot(obj,gene)
+  plot <- FeaturePlot(obj,gene,reduction = "umap")
   return(print(plot))
 }
 
@@ -348,6 +353,7 @@ function(req, gene="Gad1", split="sex"){
 #' @serializer png list(width = 600, height =600)
 function(req, gene="Gad1"){
   Idents(obj) <- obj@meta.data[,ident_idx]
+  message(paste0("ident_idx:",ident_idx))
   plot <- FeaturePlot(obj, gene)
   return(print(plot))
 }
@@ -415,7 +421,7 @@ function(req){
 
 
 #' @post /run-v1
-function(req, jobid="2020041684528"){
+function(req, jobid="1612737955509", k_arg=20, f_arg=0.7, o_arg=500,promoter_arg=1000){
   #ident_idx=9
   #cluster_markers <- FindAllMarkers(obj,logfc.threshold = 0.7)
   #write.csv(cluster_markers,"cluster_markers.csv")
@@ -426,8 +432,8 @@ function(req, jobid="2020041684528"){
   
   if(!is_job_exist) {
     current_wd <- getwd()
-    wd=paste0("C:/Users/flyku/Documents/GitHub/iris3-backend/plumber/",jobid)
-    dir.create(wd)
+    wd=paste0("/var/www/nodejs/iris3-backend/plumber/",jobid)
+    dir.create(wd, showWarnings = F)
     setwd(wd)
     
     #wd=paste0("/var/www/html/iris3/data/",jobid)
@@ -438,16 +444,16 @@ function(req, jobid="2020041684528"){
     
     cat(paste0("#!/bin/bash"), file="qsub.sh",sep = "\n") 
     cat(paste0("wd=",wd), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("exp_file=matrix.mtx.gz"), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("label_file=1"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("exp_file=Zeisel_expression.csv"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("label_file=Zeisel_index_label.csv"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("gene_module_file="), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("jobid=",jobid), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("motif_min_length=12"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("motif_max_length=12"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("perl /var/www/html/iris3/program/prepare_email1.pl $jobid"), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("Rscript /var/www/html/iris3/program/genefilter.R $jobid $wd$exp_file , $label_file , No 0.8 10 5000 ",label_use_predict," No"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/genefilter.R $jobid $wd$exp_file , $label_file , No ",resolution," ",nPCs," 5000 ",label_use_predict," No"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("echo gene_module_detection > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("/var/www/html/iris3/program/qubic2/qubic -i $wd$jobid\\_filtered_expression.txt -q 0.06 -c 1.0 -k 20 -o 500 -f 0.7 "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/qubic2/qubic -i $wd$jobid\\_filtered_expression.txt -q 0.06 -c 1.0 -k ",k_arg,"-o ",o_arg," -f ",f_arg), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("for file in *blocks"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("do"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("grep Conds $file |cut -d ':' -f2 >'$(basename $jobid_blocks.conds.txt)'"), file="qsub.sh",append = T,sep = "\n") 
@@ -487,13 +493,38 @@ function(req, jobid="2020041684528"){
     cat(paste0("perl /var/www/html/iris3/program/prepare_email.pl $jobid"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("echo 'finish'> done"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("chmod -R 777 ."), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("rm $wd$jobid\\_filtered_expression.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("rm $wd$jobid\\_filtered_expression.txt.chars"), file="qsub.sh",append = T,sep = "\n") 
+    
+    
+    
+    ### info.txt
+    
+    cat(paste0("is_load_exp,0"), file="info.txt",append = F,sep = "\n") 
+    cat(paste0("k_arg,",k_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("f_arg,",f_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("o_arg,",o_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("resolution_seurat,",resolution), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("n_variable_features,",nVariableFeatures), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("n_pca,",nPCs), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("label_use_predict,",label_use_predict), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("expfile,","Zeisel_expression.csv"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("labelfile,","Zeisel_index_label.csv"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("is_c,"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("promoter_arg,",promoter_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("bic_inference,2"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("gene_module_file,"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("is_imputation,No"), file="info.txt",append = T,sep = "\n") 
     
     
     message('Start IRIS3 v1')
     
     
-    system("bash qsub2.sh &")
     
+    system(paste0("cp -r ",wd," /var/www/html/iris3/data"))
+    system(paste0("cp -R /var/www/nodejs/iris3-backend/plumber/template/mouse/*"," /var/www/html/iris3/data/",jobid))
+    system("nohup sh qsub2.sh > output.txt &")
+    system(paste0("chmod -R 777 /var/www/html/iris3/data/",jobid))
     setwd(current_wd)
     return(jobid)
   } else {
