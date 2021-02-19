@@ -167,6 +167,12 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('meta-data')
+  async metaData() {
+    const jobInfo = await this.jobQueue.add('metaData', { jobid: 1 })
+    return jobInfo
+  }
+
   @Post('combine-regulon')
   async combineRegulon(@Body() body) {
     console.log(body)

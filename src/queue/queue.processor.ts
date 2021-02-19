@@ -277,6 +277,14 @@ export class QueueProcessor {
     return result
   }
 
+  @Process('metaData')
+  async metaData(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/meta-data')
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
   @Process('combineRegulon')
   async combineRegulon(job: Job) {
     console.log('running combine regulon')
