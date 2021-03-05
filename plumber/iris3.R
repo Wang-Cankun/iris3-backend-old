@@ -19,7 +19,7 @@ filename <- 'Zeisel_expression.fst'
 meta <- read.csv('Zeisel_index_label.csv')
 combine_regulon <- read.table("2020041684528_combine_regulon.txt", sep = "\t", header = T)
 ident_idx <- 1
-
+workdir <- "/var/www/nodejs/iris3-backend/plumber/"
 
 
 ## test
@@ -30,6 +30,10 @@ percentMt=5
 removeRibosome=FALSE
 nPCs=20
 resolution=0.5
+k_arg=20
+f_arg=0.7
+o_arg=500
+promoter_arg=1000
 
 source("functions.R")
 
@@ -101,7 +105,7 @@ function(req,filename,min_cells=1,min_genes=200, nVariableFeatures=3000, percent
   raw_mean_expr <- mean(as.matrix(GetAssayData(raw_obj)))
   filter_mean_expr <- mean(as.matrix(GetAssayData(obj)))
   obj <<- FindVariableFeatures(obj, selection.method = "vst", nfeatures = as.numeric(nVariableFeatures),verbose = F)
-  
+
   return(list(
     raw_n_genes = dim(raw_obj)[1],
     raw_n_cells = dim(raw_obj)[2],
@@ -157,9 +161,10 @@ function(req, nPCs=20, resolution=0.5){
   obj <- RunPCA(obj, features = variable_genes, npcs = nPCs,verbose = F)
   obj <- FindNeighbors(obj, dims = 1:nPCs,verbose = F)
   obj <- FindClusters(obj, resolution = resolution,verbose = F)
-  obj <<- RunUMAP(obj, dims = 1:nPCs,n.neighbors = 15,verbose = F)
+  obj <- RunUMAP(obj, dims = 1:nPCs,n.neighbors = 15,verbose = F)
   return(list(
-    n_seurat_clusters = length(levels(obj$seurat_clusters))
+    n_seurat_clusters = length(levels(obj$seurat_clusters)),
+    umap_pts = data.frame(umap1=as.vector(Embeddings(obj, reduction = "umap")[,1]), umap2=as.vector(Embeddings(obj, reduction = "umap")[,2]))
   ))
 }
 
@@ -230,9 +235,94 @@ function(){
   row_min <- apply(this_obj, 1, min)
   row_sd <- apply(this_obj, 1, sd)
   row_max <- apply(this_obj, 1, max)
-  result <- data.frame(gene=rownames(this_obj), mean=rowMeans(this_obj), std=row_sd, min=row_min, max=row_max)
-  return(list(result))
+  n_genes_per_cell <- obj$nFeature_RNA
+  n_reads_per_cell <- obj$nCount_RNA 
+  n_cells_per_gene <- apply(this_obj, 1, function(x) sum(x>0))
+  pct_ribo_per_gene <- obj$percent.ribo
+  pct_mito_per_gene <- obj$percent.mt
+  gene_result <-
+    data.frame(
+      gene = rownames(this_obj),
+      mean = rowMeans(this_obj),
+      std = row_sd,
+      min = row_min,
+      max = row_max,
+      n_cells_per_gene = n_cells_per_gene
+    )
+  cell_result <- 
+    data.frame(
+      n_reads_per_cell = n_reads_per_cell,
+      n_genes_per_cell = n_genes_per_cell,
+      pct_ribo_per_gene = pct_ribo_per_gene,
+      pct_mito_per_gene = pct_mito_per_gene
+    )
+  hist_genes_per_cell <- data.frame(
+    breaks=hist(n_genes_per_cell)$breaks[-1],
+    counts=hist(n_genes_per_cell)$counts
+  )
+  hist_reads_per_cell <- data.frame(
+    breaks=hist(n_reads_per_gene)$breaks[-1],
+    counts=hist(n_reads_per_gene)$counts
+  )
+  hist_cells_per_gene <- data.frame(
+    breaks=hist(n_cells_per_gene)$breaks[-1],
+    counts=hist(n_cells_per_gene)$counts
+  )
+  return(
+    list(
+      gene_result,
+      cell_result,
+      hist_genes_per_cell,
+      hist_reads_per_cell,
+      hist_cells_per_gene
+    )
+  )
 }
+
+#' Get all metadata in a list
+#' @get /meta-data
+function(){
+  
+  n_count_rna <- obj@meta.data$nCount_RNA
+  n_feature_rna <- obj@meta.data$nFeature_RNA
+  pct_mito <- obj@meta.data$percent.mt
+  pct_ribo <- obj@meta.data$percent.ribo
+  
+  meta <- read.csv('Zeisel_index_label.csv')
+  obj <<- AddMetaData(obj, meta$Label, col.name = "cell_type")
+  obj <<- AddMetaData(obj, meta$Sex, col.name = "sex")
+  obj <<- AddMetaData(obj, meta$Sample, col.name = "sample")
+  
+  meta1_title <- "Cell type"
+  meta1_name <- names(table(meta$Label))
+  meta1_val <- as.vector(table(meta$Label))
+  
+  meta2_title <- "Sex"
+  meta2_name <- names(table(meta$Sex))
+  meta2_val <- as.vector(table(meta$Sex))
+  
+  meta3_title <- "Sample"
+  meta3_name <- names(table(meta$Sample))
+  meta3_val <- as.vector(table(meta$Sample))
+  
+  result <- list(meta1_title = meta1_title,
+                 meta1_name=meta1_name, 
+                 meta1_val=data.frame(name=meta1_name, value=meta1_val), 
+                 meta2_title = meta2_title,
+                 meta2_name=meta2_name, 
+                 meta2_val=data.frame(name=meta2_name, value=meta2_val), 
+                 meta3_title = meta3_title,
+                 meta3_name=meta3_name, 
+                 meta3_val=data.frame(name=meta3_name, value=meta3_val), 
+                 n_count_rna = n_count_rna,
+                 n_feature_rna = n_feature_rna,
+                 pct_mito = pct_mito,
+                 pct_ribo = pct_ribo
+                 )
+  message("meta-data send")
+  return(result)
+}
+
 
 
 #' Plot umap
@@ -300,11 +390,12 @@ function(req, nPCs=20, resolution=0.5){
   obj <- FindClusters(obj, resolution = resolution,verbose = F)
   obj <<- RunUMAP(obj, dims = 1:nPCs,n.neighbors = 15,verbose = F)
   return(list(
-    n_seurat_clusters = length(levels(obj$seurat_clusters))
+    n_seurat_clusters = length(levels(obj$seurat_clusters)),
+    umap_pts = data.frame(umap1=as.vector(Embeddings(obj, reduction = "umap")[,1]), umap2=as.vector(Embeddings(obj, reduction = "umap")[,]))
   ))
 }
 
-#' Get Variable genes list
+#' Get regulon results
 #' @post /combine-regulon
 function(req, jobid){
   print('return combine regulons')
@@ -315,6 +406,7 @@ function(req, jobid){
     list(combine_regulon)
   ))
 }
+
 
 #' Plot features in umap
 #' @post /umap-gene
@@ -415,7 +507,7 @@ function(req){
 
 
 #' @post /run-v1
-function(req, jobid="2020041684528"){
+function(req, jobid="1612737955509", k_arg=20, f_arg=0.7, o_arg=500,promoter_arg=1000){
   #ident_idx=9
   #cluster_markers <- FindAllMarkers(obj,logfc.threshold = 0.7)
   #write.csv(cluster_markers,"cluster_markers.csv")
@@ -426,8 +518,8 @@ function(req, jobid="2020041684528"){
   
   if(!is_job_exist) {
     current_wd <- getwd()
-    wd=paste0("C:/Users/flyku/Documents/GitHub/iris3-backend/plumber/",jobid)
-    dir.create(wd)
+    wd=paste0(workdir,jobid)
+    dir.create(wd, showWarnings = F)
     setwd(wd)
     
     #wd=paste0("/var/www/html/iris3/data/",jobid)
@@ -438,16 +530,16 @@ function(req, jobid="2020041684528"){
     
     cat(paste0("#!/bin/bash"), file="qsub.sh",sep = "\n") 
     cat(paste0("wd=",wd), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("exp_file=matrix.mtx.gz"), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("label_file=1"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("exp_file=Zeisel_expression.csv"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("label_file=Zeisel_index_label.csv"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("gene_module_file="), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("jobid=",jobid), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("motif_min_length=12"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("motif_max_length=12"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("perl /var/www/html/iris3/program/prepare_email1.pl $jobid"), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("Rscript /var/www/html/iris3/program/genefilter.R $jobid $wd$exp_file , $label_file , No 0.8 10 5000 ",label_use_predict," No"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("Rscript /var/www/html/iris3/program/genefilter.R $jobid $wd$exp_file , $label_file , No ",resolution," ",nPCs," 5000 ",label_use_predict," No"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("echo gene_module_detection > running_status.txt"), file="qsub.sh",append = T,sep = "\n") 
-    cat(paste0("/var/www/html/iris3/program/qubic2/qubic -i $wd$jobid\\_filtered_expression.txt -q 0.06 -c 1.0 -k 20 -o 500 -f 0.7 "), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("/var/www/html/iris3/program/qubic2/qubic -i $wd$jobid\\_filtered_expression.txt -q 0.06 -c 1.0 -k ",k_arg,"-o ",o_arg," -f ",f_arg), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("for file in *blocks"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("do"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("grep Conds $file |cut -d ':' -f2 >'$(basename $jobid_blocks.conds.txt)'"), file="qsub.sh",append = T,sep = "\n") 
@@ -487,13 +579,38 @@ function(req, jobid="2020041684528"){
     cat(paste0("perl /var/www/html/iris3/program/prepare_email.pl $jobid"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("echo 'finish'> done"), file="qsub.sh",append = T,sep = "\n") 
     cat(paste0("chmod -R 777 ."), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("rm $wd$jobid\\_filtered_expression.txt"), file="qsub.sh",append = T,sep = "\n") 
+    cat(paste0("rm $wd$jobid\\_filtered_expression.txt.chars"), file="qsub.sh",append = T,sep = "\n") 
+    
+    
+    
+    ### info.txt
+    
+    cat(paste0("is_load_exp,0"), file="info.txt",append = F,sep = "\n") 
+    cat(paste0("k_arg,",k_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("f_arg,",f_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("o_arg,",o_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("resolution_seurat,",resolution), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("n_variable_features,",nVariableFeatures), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("n_pca,",nPCs), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("label_use_predict,",label_use_predict), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("expfile,","Zeisel_expression.csv"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("labelfile,","Zeisel_index_label.csv"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("is_c,"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("promoter_arg,",promoter_arg), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("bic_inference,2"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("gene_module_file,"), file="info.txt",append = T,sep = "\n") 
+    cat(paste0("is_imputation,No"), file="info.txt",append = T,sep = "\n") 
     
     
     message('Start IRIS3 v1')
     
     
-    system("bash qsub2.sh &")
     
+    system(paste0("cp -r ",wd," /var/www/html/iris3/data"))
+    system(paste0("cp -R /var/www/nodejs/iris3-backend/plumber/template/mouse/*"," /var/www/html/iris3/data/",jobid))
+    system("nohup sh qsub2.sh > output.txt &")
+    system(paste0("chmod -R 777 /var/www/html/iris3/data/",jobid))
     setwd(current_wd)
     return(jobid)
   } else {
