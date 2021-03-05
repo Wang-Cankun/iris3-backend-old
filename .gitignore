@@ -7,7 +7,7 @@ tmp
 *.tsv.gz*
 *.h5
 pbmc_granulocyte_sorted_10k_per_barcode_metrics.csv
-
+/plumber/data
 
 # compiled output
 /dist
