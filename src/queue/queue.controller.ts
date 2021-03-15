@@ -119,6 +119,36 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('merge-idents')
+  async mergeIdents(@Body() body) {
+    const jobInfo = this.jobQueue.add('merge-idents', body)
+    return jobInfo
+  }
+
+  @Post('select-category')
+  async selectCategory(@Body() body) {
+    const jobInfo = this.jobQueue.add('select-category', body)
+    return jobInfo
+  }
+
+  @Post('select-cells')
+  async selectCells(@Body() body) {
+    const jobInfo = this.jobQueue.add('select-cells', body)
+    return jobInfo
+  }
+
+  @Post('subset-cells')
+  async subsetCells(@Body() body) {
+    const jobInfo = this.jobQueue.add('subset-cells', body)
+    return jobInfo
+  }
+
+  @Post('set-obj')
+  async setObj(@Body() body) {
+    const jobInfo = this.jobQueue.add('set-obj', body)
+    return jobInfo
+  }
+
   @Post('qcplot')
   async qcPlot() {
     const jobInfo = await this.jobQueue.add('qcplot', { jobid: 1 })
@@ -197,6 +227,13 @@ export class QueueController {
   async umapClusterPlot() {
     console.log('umap plot')
     const jobInfo = await this.jobQueue.add('umapClusterPlot', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('umap-static')
+  async umapStatic(@Body() body) {
+    console.log('umap static')
+    const jobInfo = await this.jobQueue.add('umapStatic', body)
     return jobInfo
   }
 

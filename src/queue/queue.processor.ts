@@ -111,6 +111,48 @@ export class QueueProcessor {
     return result
   }
 
+  @Process('merge-idents')
+  async mergeIdents(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/merge-idents', job.data)
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
+
+  @Process('select-category')
+  async selectCategory(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/select-category', job.data)
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
+
+  @Process('select-cells')
+  async selectCells(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/select-cells', job.data)
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
+  @Process('subset-cells')
+  async subsetCells(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/subset-cells', job.data)
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
+  @Process('set-obj')
+  async setObj(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/set-obj', job.data)
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
   @Process('transfer-cell-type')
   async transferCellType(job: Job) {
     const result = await this.httpService
@@ -303,10 +345,22 @@ export class QueueProcessor {
       .then((res) => res.data)
     return result
   }
+
   @Process('umapClusterPlot')
   async umapClusterPlot(job: Job) {
     const result = await this.httpService
       .get('http://localhost:8000/umap-cluster', {
+        responseType: 'arraybuffer'
+      })
+      .toPromise()
+      .then((res) => res.data)
+    return result
+  }
+
+  @Process('umapStatic')
+  async umapStatic(job: Job) {
+    const result = await this.httpService
+      .post('http://localhost:8000/umap-static', job.data, {
         responseType: 'arraybuffer'
       })
       .toPromise()
