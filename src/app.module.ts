@@ -16,7 +16,9 @@ import { QueueModule } from './queue/queue.module'
 import { EventsModule } from './events/events.module'
 import * as Joi from '@hapi/joi'
 import { MulterModule } from '@nestjs/platform-express'
-import { JobModule } from './job/job.module';
+import { JobModule } from './job/job.module'
+import { PlumberService } from './plumber/plumber.service'
+import { PlumberModule } from './plumber/plumber.module'
 
 @Module({
   imports: [
@@ -65,7 +67,8 @@ import { JobModule } from './job/job.module';
     CommandModule,
     QueueModule,
     EventsModule,
-    JobModule
+    JobModule,
+    PlumberModule
   ],
   controllers: [AppController],
   providers: [AppService]

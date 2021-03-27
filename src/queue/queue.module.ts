@@ -8,6 +8,7 @@ import { JobService } from 'src/job/job.service'
 import { JobModule } from 'src/job/job.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Job } from 'src/job/entities/job.entity'
+import { PlumberService } from '../plumber/plumber.service'
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { Job } from 'src/job/entities/job.entity'
       inject: [ConfigService]
     })
   ],
-  providers: [QueueService, QueueProcessor, JobService],
+  providers: [QueueService, QueueProcessor, JobService, PlumberService],
   controllers: [QueueController]
 })
 export class QueueModule {}

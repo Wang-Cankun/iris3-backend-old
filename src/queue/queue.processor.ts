@@ -14,6 +14,7 @@ import moveFile from 'move-file'
 import { Job as JobEntity } from 'src/job/entities/job.entity'
 import { JobService } from 'src/job/job.service'
 import { Repository } from 'typeorm'
+import { PlumberService } from '../plumber/plumber.service'
 
 @Processor('task')
 export class QueueProcessor {
@@ -21,8 +22,9 @@ export class QueueProcessor {
   constructor(
     @InjectQueue('task')
     private readonly jobQueue: Queue,
-    private httpService: HttpService,
-    private jobService: JobService
+    private readonly httpService: HttpService,
+    private readonly jobService: JobService,
+    private readonly plumberService: PlumberService
   ) {}
 
   @OnQueueActive()
@@ -95,37 +97,33 @@ export class QueueProcessor {
 
   @Process('load')
   async loadExpression(job: Job) {
-    const result = await this.httpService
-      .post('http://localhost:8000/load', job.data)
-      .toPromise()
-      .then((response) => response.data)
+    const result = await this.plumberService.runCommand('load', job.data)
     return result
   }
 
   @Process('cluster')
   async cluster(job: Job) {
-    const result = await this.httpService
-      .post('http://localhost:8000/cluster', job.data)
-      .toPromise()
-      .then((response) => response.data)
+    const result = await this.plumberService.runCommand('cluster', job.data)
+    console.log(result)
     return result
   }
 
   @Process('merge-idents')
   async mergeIdents(job: Job) {
-    const result = await this.httpService
-      .post('http://localhost:8000/merge-idents', job.data)
-      .toPromise()
-      .then((res) => res.data)
+    const result = await this.plumberService.runCommand(
+      'merge-idents',
+      job.data
+    )
+
     return result
   }
 
   @Process('select-category')
   async selectCategory(job: Job) {
-    const result = await this.httpService
-      .post('http://localhost:8000/select-category', job.data)
-      .toPromise()
-      .then((res) => res.data)
+    const result = await this.plumberService.runCommand(
+      'select-category',
+      job.data
+    )
     return result
   }
 
