@@ -183,6 +183,7 @@ function(){
 #' @serializer png list(width = 500, height =500)
 function(){
   Idents(obj) <- obj@meta.data$empty_ident
+  message(paste0("ident_idx:",ident_idx))
   plot <- VlnPlot(obj, features = c("nFeature_RNA"), ncol = 1)
   return(print(plot))
 }
@@ -413,7 +414,7 @@ function(req, jobid){
 #' @serializer png list(width = 600, height =600)
 function(req, gene="Gad1"){
   Idents(obj) <- obj@meta.data[,ident_idx]
-  plot <- FeaturePlot(obj,gene)
+  plot <- FeaturePlot(obj,gene,reduction = "umap")
   return(print(plot))
 }
 
@@ -440,6 +441,7 @@ function(req, gene="Gad1", split="sex"){
 #' @serializer png list(width = 600, height =600)
 function(req, gene="Gad1"){
   Idents(obj) <- obj@meta.data[,ident_idx]
+  message(paste0("ident_idx:",ident_idx))
   plot <- FeaturePlot(obj, gene)
   return(print(plot))
 }
