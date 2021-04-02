@@ -70,9 +70,27 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('load-multi-rna')
+  async loadMultiRna(@Body() body) {
+    const jobInfo = this.jobQueue.add('load-multi-rna', body)
+    return jobInfo
+  }
+
+  @Post('load-multiome')
+  async loadMultiome(@Body() body) {
+    const jobInfo = this.jobQueue.add('load-multiome', body)
+    return jobInfo
+  }
+
   @Post('cluster')
   async cluster(@Body() body) {
     const jobInfo = this.jobQueue.add('cluster', body)
+    return jobInfo
+  }
+
+  @Post('cluster-multiome')
+  async clusterMultiome(@Body() body) {
+    const jobInfo = this.jobQueue.add('cluster-multiome', body)
     return jobInfo
   }
 
@@ -122,6 +140,12 @@ export class QueueController {
   @Post('merge-idents')
   async mergeIdents(@Body() body) {
     const jobInfo = this.jobQueue.add('merge-idents', body)
+    return jobInfo
+  }
+
+  @Post('rename-idents')
+  async renameIdents(@Body() body) {
+    const jobInfo = this.jobQueue.add('rename-idents', body)
     return jobInfo
   }
 
@@ -194,6 +218,12 @@ export class QueueController {
   @Post('var-genes-list')
   async varGenesList() {
     const jobInfo = await this.jobQueue.add('varGenesList', { jobid: 1 })
+    return jobInfo
+  }
+
+  @Post('atac-qc-list')
+  async atacQcList() {
+    const jobInfo = await this.jobQueue.add('atacQcList', { jobid: 1 })
     return jobInfo
   }
 
