@@ -242,8 +242,25 @@ export class QueueController {
 
   @Post('deg')
   async deg(@Body() body) {
-    console.log('QueueController -> deg -> body', body)
     const jobInfo = this.jobQueue.add('deg', body)
+    return jobInfo
+  }
+
+  @Post('gsea-table')
+  async gseaTable(@Body() body) {
+    const jobInfo = this.jobQueue.add('gsea-table', body)
+    return jobInfo
+  }
+
+  @Post('gsea-plot')
+  async gseaPlot(@Body() body) {
+    const jobInfo = this.jobQueue.add('gsea-plot', body)
+    return jobInfo
+  }
+
+  @Post('gene-correlation-plot')
+  async geneCorPlot(@Body() body) {
+    const jobInfo = this.jobQueue.add('gene-correlation-plot', body)
     return jobInfo
   }
 

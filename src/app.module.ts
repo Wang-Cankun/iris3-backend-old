@@ -13,7 +13,6 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { BullModule } from '@nestjs/bull'
 import { QueueModule } from './queue/queue.module'
-import { EventsModule } from './events/events.module'
 import * as Joi from '@hapi/joi'
 import { MulterModule } from '@nestjs/platform-express'
 import { JobModule } from './job/job.module'
@@ -66,7 +65,6 @@ import { PlumberModule } from './plumber/plumber.module'
     DockerModule,
     CommandModule,
     QueueModule,
-    EventsModule,
     JobModule,
     PlumberModule
   ],

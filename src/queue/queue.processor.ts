@@ -277,10 +277,31 @@ export class QueueProcessor {
 
   @Process('deg')
   async deg(job: Job) {
-    const result = await this.httpService
-      .post('http://localhost:8000/deg', job.data)
-      .toPromise()
-      .then((res) => res.data)
+    const result = await this.plumberService.runCommand('deg', job.data)
+    return result
+  }
+
+  @Process('gsea-table')
+  async gseaTable(job: Job) {
+    const result = await this.plumberService.runCommand('gsea-table', job.data)
+    return result
+  }
+
+  @Process('gsea-plot')
+  async gseaPlot(job: Job) {
+    const result = await this.plumberService.runStaticImage(
+      'gsea-plot',
+      job.data
+    )
+    return result
+  }
+
+  @Process('gene-correlation-plot')
+  async geneCorPlot(job: Job) {
+    const result = await this.plumberService.runStaticImage(
+      'gene-correlation-plot',
+      job.data
+    )
     return result
   }
 
