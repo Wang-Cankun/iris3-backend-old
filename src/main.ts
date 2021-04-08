@@ -12,19 +12,19 @@ async function bootstrap() {
   const port = configService.get('PORT')
 
   // Add global prefix on all routes
-  app.setGlobalPrefix('/iris3/api')
+  app.setGlobalPrefix('/deepmaps/api')
 
   // Enable Express Compression
   app.use(compression())
 
   // Enbale OpenAI Swagger
   const swaggerOptions = new DocumentBuilder()
-    .setTitle('IRIS3 API')
-    .setDescription('IRIS3 API documentation')
+    .setTitle('deepmaps API')
+    .setDescription('deepmaps API documentation')
     .setVersion('1.0')
     .build()
   const document = SwaggerModule.createDocument(app, swaggerOptions)
-  SwaggerModule.setup('/iris3/api/docs', app, document)
+  SwaggerModule.setup('/deepmaps/api/docs', app, document)
 
   // Serve a static folder on ./tmp
   // app.use(express.static(join(process.cwd(), '../tmp')))
