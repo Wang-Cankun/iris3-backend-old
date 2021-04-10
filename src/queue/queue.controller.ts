@@ -264,6 +264,12 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('coverage-plot')
+  async coveragePlot(@Body() body) {
+    const jobInfo = this.jobQueue.add('coverage-plot', body)
+    return jobInfo
+  }
+
   @Post('pie-meta')
   async pieMetaPlot() {
     console.log('pie meta plot')

@@ -295,6 +295,14 @@ export class QueueProcessor {
     )
     return result
   }
+  @Process('coverage-plot')
+  async coveragePlot(job: Job) {
+    const result = await this.plumberService.runStaticImage(
+      'coverage-plot',
+      job.data
+    )
+    return result
+  }
 
   @Process('gene-correlation-plot')
   async geneCorPlot(job: Job) {
