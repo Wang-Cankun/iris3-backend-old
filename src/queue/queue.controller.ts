@@ -137,6 +137,30 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('assays')
+  async getAssay(@Body() body) {
+    const result = this.jobQueue.add('get-assay', body)
+    return result
+  }
+
+  @Post('set-assay')
+  async setAssay(@Body() body) {
+    const jobInfo = this.jobQueue.add('set-assay', body)
+    return jobInfo
+  }
+
+  @Post('embeddings')
+  async getEmbedding(@Body() body) {
+    const result = this.jobQueue.add('get-embedding', body)
+    return result
+  }
+
+  @Post('set-embedding')
+  async setEmbedding(@Body() body) {
+    const jobInfo = this.jobQueue.add('set-embedding', body)
+    return jobInfo
+  }
+
   @Post('merge-idents')
   async mergeIdents(@Body() body) {
     const jobInfo = this.jobQueue.add('merge-idents', body)

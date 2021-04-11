@@ -76,7 +76,7 @@ export class QueueProcessor {
   @Process('get-ident')
   async getIdent(job: Job) {
     const result = await this.httpService
-      .get('http://localhost:8000/ident', job.data)
+      .get('http://localhost:8000/idents', job.data)
       .toPromise()
       .then((response) => response.data)
     return result
@@ -89,6 +89,34 @@ export class QueueProcessor {
       .toPromise()
       .then((response) => response.data)
     return result
+  }
+
+  @Process('get-assay')
+  async getAssay(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/assays', job.data)
+      .toPromise()
+      .then((response) => response.data)
+    return result
+  }
+
+  @Process('set-assay')
+  async setAssay(job: Job) {
+    return await this.plumberService.runCommand('set-assay', job.data)
+  }
+
+  @Process('get-embedding')
+  async getEmbedding(job: Job) {
+    const result = await this.httpService
+      .get('http://localhost:8000/embeddings', job.data)
+      .toPromise()
+      .then((response) => response.data)
+    return result
+  }
+
+  @Process('set-embedding')
+  async setEmbedding(job: Job) {
+    return await this.plumberService.runCommand('set-embedding', job.data)
   }
 
   @Process('load')
