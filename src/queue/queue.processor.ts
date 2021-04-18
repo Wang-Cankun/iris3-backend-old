@@ -332,6 +332,15 @@ export class QueueProcessor {
     return result
   }
 
+  @Process('static-heatmap')
+  async staticHeatmap(job: Job) {
+    const result = await this.plumberService.runStaticImage(
+      'static-heatmap',
+      job.data
+    )
+    return result
+  }
+
   @Process('gene-correlation-plot')
   async geneCorPlot(job: Job) {
     const result = await this.plumberService.runStaticImage(

@@ -294,6 +294,12 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('static-heatmap')
+  async staticHeatmap(@Body() body) {
+    const jobInfo = this.jobQueue.add('static-heatmap', body)
+    return jobInfo
+  }
+
   @Post('pie-meta')
   async pieMetaPlot() {
     console.log('pie meta plot')
