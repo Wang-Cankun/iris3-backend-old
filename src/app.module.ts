@@ -5,7 +5,7 @@ import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { UploadModule } from './upload/upload.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { EmailModule } from './email/email.module'
 import { DockerModule } from './docker/docker.module'
 import { CommandModule } from './command/command.module'
@@ -21,9 +21,6 @@ import { PlumberModule } from './plumber/plumber.module'
 
 @Module({
   imports: [
-    MulterModule.register({
-      dest: '/tmp'
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
 
@@ -47,6 +44,13 @@ import { PlumberModule } from './plumber/plumber.module'
         GOOGLE_CLIENT_ID: Joi.required(),
         GOOGLE_SECRET: Joi.required()
       })
+    }),
+    MulterModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        dest: configService.get('UPLOAD_PATH')
+      }),
+      inject: [ConfigService]
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',

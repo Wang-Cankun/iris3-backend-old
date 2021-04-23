@@ -66,7 +66,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('profile')
+  @Get('/profile')
   getProfile(@JwtPayload() payload: JwtPayloadDto): JwtPayloadDto {
     return payload
   }

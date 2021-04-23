@@ -26,9 +26,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerOptions)
   SwaggerModule.setup('/deepmaps/api/docs', app, document)
 
-  // Serve a static folder on ./tmp
-  // app.use(express.static(join(process.cwd(), '../tmp')))
-
   await app.listen(port)
   console.log(`Application is running on: ${await app.getUrl()}`)
 }

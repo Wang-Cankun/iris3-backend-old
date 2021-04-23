@@ -16,7 +16,7 @@ import {
   FileInterceptor
 } from '@nestjs/platform-express'
 import { Queue } from 'bull'
-
+import { multerOptions } from 'src/config/multer.config'
 @Controller('queue')
 export class QueueController {
   constructor(
@@ -52,10 +52,11 @@ export class QueueController {
         { name: 'expFile', maxCount: 3 },
         { name: 'labelFile', maxCount: 1 }
       ],
-      { dest: './tmp' }
+      multerOptions
     )
   )
   async uploadFile(@UploadedFiles() files, @Body() body) {
+    console.log(files)
     const jobInfo = await this.jobQueue.add('upload', {
       file: files,
       body: body

@@ -14,7 +14,7 @@ export class UploadController {
   findAll() {
     return 'test get'
   }
-  @Post('expression')
+  @Post('data')
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(@UploadedFile() file, @Body() body) {
     console.log(body)
