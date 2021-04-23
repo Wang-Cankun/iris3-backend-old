@@ -42,18 +42,18 @@ export class AuthController {
   }
 
   @UseGuards(LocalAuthGuard)
-  @Post('/login')
+  @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.user)
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/logout')
+  @Post('logout')
   async logout(@Request() req) {
     return 'logout to be add'
   }
 
-  @Get('/google')
+  @Get('google')
   @UseGuards(AuthGuard('google'))
   googleAuth(@Req() req) {
     return req
@@ -66,13 +66,13 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/profile')
+  @Get('profile')
   getProfile(@JwtPayload() payload: JwtPayloadDto): JwtPayloadDto {
     return payload
   }
 
   @UseGuards(UserRegisteredGuard)
-  @Post('/register')
+  @Post('register')
   create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.authService.createUser(createUserDto)
   }
@@ -92,13 +92,13 @@ export class AuthController {
 
   @UseGuards(UserExistGuard)
   @UseGuards(JwtAuthGuard)
-  @Delete('/delete')
+  @Delete('delete')
   remove(@Body() loginDto: LoginDto): Promise<User> {
     return this.authService.removeAccount(loginDto)
   }
 
   @UseGuards(UserExistGuard)
-  @Post('/forgot')
+  @Post('forgot')
   sendResetEmail(@Body() emailDto: EmailDto): any {
     return this.authService.resetPassword(emailDto.email)
   }

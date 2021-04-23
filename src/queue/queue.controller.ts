@@ -1,22 +1,7 @@
 import { InjectQueue, OnGlobalQueueCompleted } from '@nestjs/bull'
-import {
-  Body,
-  Controller,
-  Get,
-  HttpService,
-  Param,
-  Post,
-  UseInterceptors,
-  UploadedFiles,
-  Req
-} from '@nestjs/common'
-import {
-  AnyFilesInterceptor,
-  FileFieldsInterceptor,
-  FileInterceptor
-} from '@nestjs/platform-express'
+import { Body, Controller, Get, HttpService, Param, Post } from '@nestjs/common'
+
 import { Queue } from 'bull'
-import { multerOptions } from 'src/config/multer.config'
 @Controller('queue')
 export class QueueController {
   constructor(
@@ -43,26 +28,6 @@ export class QueueController {
     console.log('Add test event')
     this.jobQueue.add('test', { data: 1, somedata: 2 })
     return 1
-  }
-
-  @Post('upload')
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'expFile', maxCount: 3 },
-        { name: 'labelFile', maxCount: 1 }
-      ],
-      multerOptions
-    )
-  )
-  async uploadFile(@UploadedFiles() files, @Body() body) {
-    console.log(files)
-    const jobInfo = await this.jobQueue.add('upload', {
-      file: files,
-      body: body
-    })
-    //return { file, body, jobid }
-    return jobInfo
   }
 
   @Post('load')

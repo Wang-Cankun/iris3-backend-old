@@ -3,20 +3,16 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
-import { UploadModule } from './upload/upload.module'
+import { FileModule } from './file/file.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { EmailModule } from './email/email.module'
 import { DockerModule } from './docker/docker.module'
 import { CommandModule } from './command/command.module'
-import { ServeStaticModule } from '@nestjs/serve-static'
-import { join } from 'path'
-import { BullModule } from '@nestjs/bull'
 import { QueueModule } from './queue/queue.module'
 import * as Joi from '@hapi/joi'
 import { MulterModule } from '@nestjs/platform-express'
 import { JobModule } from './job/job.module'
-import { PlumberService } from './plumber/plumber.service'
 import { PlumberModule } from './plumber/plumber.module'
 
 @Module({
@@ -62,9 +58,9 @@ import { PlumberModule } from './plumber/plumber.module'
       autoLoadEntities: true,
       synchronize: true
     }),
+    FileModule,
     AuthModule,
     UsersModule,
-    UploadModule,
     EmailModule,
     DockerModule,
     CommandModule,
