@@ -1,15 +1,22 @@
 import { Injectable } from '@nestjs/common'
 import { compareSync } from 'bcrypt'
 import * as Docker from 'dockerode'
+import { ContainerName } from './dto/container-name.dto'
+import { RunContainerDto } from './dto/run-container.dto'
+import { StopContainerDto } from './dto/stop-container.dto'
 
 @Injectable()
 export class DockerService {
-  private readonly docker
-  private readonly container
+  private readonly dockerHost
+  private readonly docker1
   private readonly CTRL_P = '\u0010\n'
   private readonly CTRL_Q = '\u0011\n'
   constructor() {
-    this.docker = new Docker()
+    this.dockerHost = new Docker()
+    this.docker1 = new Docker({
+      host: process.env.VM1_HOST,
+      port: process.env.VM1_PORT
+    })
   }
 
   /**
@@ -28,43 +35,12 @@ export class DockerService {
    */
   async ping() {
     try {
-      return await this.docker.ping()
+      return await this.docker1.ping()
     } catch (err) {
       throw new Error()
     }
   }
-  async testExec(param) {
-    const logs = await this.container.logs({
-      follow: true,
-      stdout: true,
-      stderr: true,
-      details: false,
-      tail: 50,
-      timestamps: true
-    })
 
-    // const command = ['library(Seurat)']
-    const options = {
-      Cmd: ['R'],
-      AttachStdout: true,
-      AttachStderr: true,
-      hijack: true,
-      stdin: true,
-      Detach: true,
-      tty: false
-    }
-
-    const exec = await this.container.exec(options)
-
-    return new Promise(async (resolve, reject) => {
-      await exec.start(async (err, stream) => {
-        if (err) return reject()
-        let message = ''
-        stream.on('data', (data) => (message += data.toString()))
-        stream.on('end', () => resolve(message))
-      })
-    })
-  }
   async streamToString(stream) {
     const chunks = []
     return new Promise((resolve, reject) => {
@@ -74,41 +50,51 @@ export class DockerService {
     })
   }
 
-  async test(param) {
-    const options = {
-      stream: true,
-      stdin: true,
-      stdout: true,
-      stderr: true
-    }
-    console.log(await this.ping())
-    return new Promise((resolve, reject) => {
-      this.container.attach(options, async (err, stream) => {
-        if (err) return reject(err)
-        stream.write('R\nsetwd("/iris3")\n')
-        stream.write('date()\n')
-        resolve('done')
-      })
-    })
+  async test() {
+    return await this.docker1.listContainers()
   }
 
-  async runCmd(cmd) {
-    const container = this.docker.getContainer('iris3-workflow-env')
-    const options = {
-      stream: true,
-      stdin: true,
-      stdout: true,
-      stderr: true
-    }
+  async listContainers(docker) {
+    return await docker.listContainers()
+  }
 
-    return new Promise((resolve, reject) => {
-      container.attach(options, async (err, stream) => {
-        if (err) return reject(err)
-        stream.write('R\nsetwd("/iris3")\n')
-        stream.write(cmd)
-        stream.write('date()\n')
-        resolve('done')
+  async runContainer(runContainerDto: RunContainerDto): Promise<Docker> {
+    const createOptions = {
+      name: runContainerDto.port
+    }
+    const cmd = []
+    const out = ''
+    const result = this.docker1
+      .run(runContainerDto.image, cmd, out, createOptions)
+      .then((data) => {
+        const output = data[0]
+        const container = data[1]
+        console.log(output)
+        return container
       })
-    })
+      .catch((err) => {
+        console.log(err)
+      })
+
+    return result
+  }
+  async stopContainer(stopContainerDto: StopContainerDto): Promise<Docker> {
+    const result = this.docker1
+      .getContainer(stopContainerDto.id)
+      .stop()
+      .then((data) => {
+        const output = data[0]
+        const container = data[1]
+        console.log(output)
+        return container.remove()
+      })
+      .then((data) => {
+        console.log('container removed', data)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+    return result
   }
 }

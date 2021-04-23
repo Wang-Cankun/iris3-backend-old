@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
   Controller,
   Post,
@@ -6,7 +8,6 @@ import {
   Request,
   Param,
   UseGuards,
-  Patch,
   Req,
   Delete
 } from '@nestjs/common'
@@ -54,7 +55,9 @@ export class AuthController {
 
   @Get('/google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {}
+  googleAuth(@Req() req) {
+    return req
+  }
 
   @Get('/google/redirect')
   @UseGuards(AuthGuard('google'))

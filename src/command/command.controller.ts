@@ -21,7 +21,7 @@ export class CommandController {
   @SubscribeMessage('preprocess')
   async preprocess(@Body() params) {
     console.log(params)
-    this.commandService.runPreprocessing(params)
+    this.commandService.runPreprocessing()
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(Date())
