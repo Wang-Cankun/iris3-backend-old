@@ -10,6 +10,7 @@ import { HttpService, Logger } from '@nestjs/common'
 import { Job, JobCounts, Queue } from 'bull'
 import { Job as JobEntity } from 'src/job/entities/job.entity'
 import { JobService } from 'src/job/job.service'
+import { FileService } from '../file/file.service'
 import { PlumberService } from '../plumber/plumber.service'
 
 @Processor('task')
@@ -20,7 +21,8 @@ export class QueueProcessor {
     private readonly jobQueue: Queue,
     private readonly httpService: HttpService,
     private readonly jobService: JobService,
-    private readonly plumberService: PlumberService
+    private readonly plumberService: PlumberService,
+    private readonly fileService: FileService
   ) {}
 
   @OnQueueActive()
@@ -61,16 +63,36 @@ export class QueueProcessor {
     this.logger.log('Transcoding completed')
   }
 
-  @Process('upload')
-  async submit(job: Job) {
-    const dto = {
-      ...job.data.body,
-      expFile: job.data.file.expFile[0].filename,
-      labelFile: job.data.file.labelFile[0].filename
-    }
-    console.log(dto)
-    await this.jobService.create(dto)
-    return 1
+  @Process('load')
+  async loadExpression(job: Job) {
+    const uploadFiles = await this.fileService.findAll(job.data.jobid)
+
+    const rnaFile = uploadFiles.filter((file) => file.fieldname === 'singleRna')
+    const labelFile = uploadFiles.filter(
+      (file) => file.fieldname === 'labelFile-singleRna'
+    )
+    const loadPayload = { ...job.data, expr: rnaFile, label: labelFile }
+    console.log(loadPayload)
+    const result = await this.plumberService.runCommand('load', loadPayload)
+    return result
+  }
+
+  @Process('load-multi-rna')
+  async loadMultiRna(job: Job) {
+    const result = await this.plumberService.runCommand(
+      'load-multi-rna',
+      job.data
+    )
+    return result
+  }
+
+  @Process('load-multiome')
+  async loadMultiome(job: Job) {
+    const result = await this.plumberService.runCommand(
+      'load-multiome',
+      job.data
+    )
+    return result
   }
 
   @Process('get-ident')
@@ -117,30 +139,6 @@ export class QueueProcessor {
   @Process('set-embedding')
   async setEmbedding(job: Job) {
     return await this.plumberService.runCommand('set-embedding', job.data)
-  }
-
-  @Process('load')
-  async loadExpression(job: Job) {
-    const result = await this.plumberService.runCommand('load', job.data)
-    return result
-  }
-
-  @Process('load-multi-rna')
-  async loadMultiRna(job: Job) {
-    const result = await this.plumberService.runCommand(
-      'load-multi-rna',
-      job.data
-    )
-    return result
-  }
-
-  @Process('load-multiome')
-  async loadMultiome(job: Job) {
-    const result = await this.plumberService.runCommand(
-      'load-multiome',
-      job.data
-    )
-    return result
   }
 
   @Process('cluster')

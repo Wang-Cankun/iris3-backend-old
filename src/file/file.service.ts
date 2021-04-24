@@ -8,19 +8,19 @@ import { File } from './entities/file.entity'
 export class FileService {
   constructor(
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>
+    private readonly fileRepo: Repository<File>
   ) {}
 
   async create(uploadFileDto: UploadFileDto): Promise<File> {
-    const file = this.fileRepository.create({
+    const file = this.fileRepo.create({
       ...uploadFileDto
     })
-    return this.fileRepository.save(file)
+    return this.fileRepo.save(file)
   }
 
-  findAll() {
-    return this.fileRepository.find({
-      relations: ['jobid']
+  async findAll(jobid: string): Promise<File[]> {
+    return await this.fileRepo.find({
+      jobid: jobid
     })
   }
 }

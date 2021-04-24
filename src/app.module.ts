@@ -19,7 +19,6 @@ import { PlumberModule } from './plumber/plumber.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-
       envFilePath: '.env',
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
@@ -44,7 +43,7 @@ import { PlumberModule } from './plumber/plumber.module'
     MulterModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        dest: configService.get('UPLOAD_PATH')
+        dest: configService.get<string>('UPLOAD_PATH')
       }),
       inject: [ConfigService]
     }),

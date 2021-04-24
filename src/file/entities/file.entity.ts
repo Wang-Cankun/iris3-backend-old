@@ -15,11 +15,11 @@ export class File {
   @Column()
   jobid: string
 
+  @Column()
+  index: number
+
   @CreateDateColumn()
   createTime: string
-
-  @Column()
-  status: string
 
   @Column()
   fieldname: string

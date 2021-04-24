@@ -4,7 +4,7 @@ export class UploadFileDto {
   jobid: string
 
   @IsString()
-  status: string
+  index: number
 
   @IsString()
   fieldname: string

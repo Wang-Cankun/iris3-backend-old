@@ -7,7 +7,7 @@ import {
   Processor
 } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
-import { Job, JobCounts, Queue } from 'bull'
+import { Job, Queue } from 'bull'
 
 @Processor('file')
 export class FileProcessor {
@@ -65,5 +65,17 @@ export class FileProcessor {
     console.log(dto)
     await 1
     return 1
+  }
+
+  @Process('copy')
+  async copyFilesToData(job: Job) {
+    const dto = {
+      ...job.data.body,
+      expFile: job.data.file.expFile[0].filename,
+      labelFile: job.data.file.labelFile[0].filename
+    }
+    console.log(dto)
+    await 1
+    return dto
   }
 }

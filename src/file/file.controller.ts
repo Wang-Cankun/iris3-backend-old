@@ -1,41 +1,56 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   UploadedFiles,
   UseInterceptors
 } from '@nestjs/common'
-import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import {
+  AnyFilesInterceptor,
+  FileFieldsInterceptor
+} from '@nestjs/platform-express'
 import { Queue } from 'bull'
 import { InjectQueue } from '@nestjs/bull'
 import { FileService } from './file.service'
+import { ConfigService } from '@nestjs/config'
+import { File } from './entities/file.entity'
 
 @Controller('file')
 export class FileController {
   constructor(
+    private configService: ConfigService,
+
     @InjectQueue('file')
     private readonly fileQueue: Queue,
 
     private readonly fileService: FileService
   ) {}
 
+  @Get(':id')
+  async getJob(@Param('id') id: string) {
+    return await this.fileQueue.getJob(id)
+  }
+
+  @Get('upload/:id')
+  async findOne(@Param('id') id: string): Promise<File[]> {
+    return await this.fileService.findAll(id)
+  }
+
   @Post('upload')
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'expFile', maxCount: 3 },
-        { name: 'labelFile', maxCount: 1 }
-      ],
-      { dest: 'tmp' }
-    )
-  )
+  @UseInterceptors(AnyFilesInterceptor())
   async uploadFile(@UploadedFiles() files, @Body() body) {
     console.log(files)
-    const jobInfo = await this.fileQueue.add('upload', {
-      file: files,
-      body: body
-    })
-    //return { file, body, jobid }
-    return jobInfo
+    const uploadDataInfo = files.map((file) => ({
+      ...file,
+      jobid: body.jobid,
+      index: body.index
+    }))
+    for (const f of uploadDataInfo) {
+      await this.fileService.create(f)
+    }
+
+    return uploadDataInfo
   }
 }

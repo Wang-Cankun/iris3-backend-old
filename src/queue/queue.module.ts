@@ -9,10 +9,13 @@ import { JobModule } from 'src/job/job.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Job } from 'src/job/entities/job.entity'
 import { PlumberService } from '../plumber/plumber.service'
+import { FileService } from '../file/file.service'
+import { FileModule } from '../file/file.module'
+import { File } from '../file/entities/file.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Job]),
+    TypeOrmModule.forFeature([Job, File]),
     HttpModule,
     BullModule.registerQueueAsync({
       name: 'task',
@@ -26,7 +29,14 @@ import { PlumberService } from '../plumber/plumber.service'
       inject: [ConfigService]
     })
   ],
-  providers: [QueueService, QueueProcessor, JobService, PlumberService],
+  providers: [
+    FileService,
+    QueueService,
+    QueueProcessor,
+    JobService,
+    PlumberService
+  ],
+  exports: [QueueProcessor],
   controllers: [QueueController]
 })
 export class QueueModule {}

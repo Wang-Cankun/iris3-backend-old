@@ -9,8 +9,6 @@ import { Job } from 'src/job/entities/job.entity'
 export type Users = any
 @Injectable()
 export class UsersService {
-  private readonly users: Users[]
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
