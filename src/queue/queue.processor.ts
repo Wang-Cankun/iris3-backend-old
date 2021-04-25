@@ -88,9 +88,21 @@ export class QueueProcessor {
 
   @Process('load-multiome')
   async loadMultiome(job: Job) {
+    const uploadFiles = await this.fileService.findAll(job.data.jobid)
+
+    const rnaFile = uploadFiles.filter((file) => file.fieldname === 'multiome')
+    const labelFile = uploadFiles.filter(
+      (file) => file.fieldname === 'labelFile-multiome'
+    )
+    const loadPayload = {
+      ...job.data,
+      expr: rnaFile,
+      label: labelFile
+    }
+    console.log(loadPayload)
     const result = await this.plumberService.runCommand(
       'load-multiome',
-      job.data
+      loadPayload
     )
     return result
   }

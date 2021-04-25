@@ -6,6 +6,9 @@ export class UploadFileDto {
   @IsString()
   index: number
 
+  @IsNumber()
+  species: string
+
   @IsString()
   fieldname: string
 

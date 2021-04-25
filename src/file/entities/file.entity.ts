@@ -18,6 +18,9 @@ export class File {
   @Column()
   index: number
 
+  @Column()
+  species: string
+
   @CreateDateColumn()
   createTime: string
 

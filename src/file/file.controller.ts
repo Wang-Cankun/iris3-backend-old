@@ -45,10 +45,13 @@ export class FileController {
     const uploadDataInfo = files.map((file) => ({
       ...file,
       jobid: body.jobid,
-      index: body.index
+      index: body.index,
+      species: body.species
     }))
-    for (const f of uploadDataInfo) {
-      await this.fileService.create(f)
+    if (body.jobid !== 'example') {
+      for (const f of uploadDataInfo) {
+        await this.fileService.create(f)
+      }
     }
 
     return uploadDataInfo
