@@ -15,7 +15,7 @@ export class File {
   @Column()
   jobid: string
 
-  @Column()
+  @Column({ default: 1 })
   index: number
 
   @Column()

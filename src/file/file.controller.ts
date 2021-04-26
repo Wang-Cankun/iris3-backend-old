@@ -41,13 +41,13 @@ export class FileController {
   @Post('upload')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadFile(@UploadedFiles() files, @Body() body) {
-    console.log(files)
     const uploadDataInfo = files.map((file) => ({
       ...file,
       jobid: body.jobid,
       index: body.index,
       species: body.species
     }))
+    console.log(uploadDataInfo)
     if (body.jobid !== 'example') {
       for (const f of uploadDataInfo) {
         await this.fileService.create(f)

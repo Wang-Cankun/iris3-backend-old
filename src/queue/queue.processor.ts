@@ -79,9 +79,21 @@ export class QueueProcessor {
 
   @Process('load-multi-rna')
   async loadMultiRna(job: Job) {
+    const uploadFiles = await this.fileService.findAll(job.data.jobid)
+
+    const rnaFile = uploadFiles.filter((file) => file.fieldname === 'multiRna')
+    const labelFile = uploadFiles.filter(
+      (file) => file.fieldname === 'labelFile-multi-rna'
+    )
+    const loadPayload = {
+      ...job.data,
+      expr: rnaFile,
+      label: labelFile
+    }
+    console.log(loadPayload)
     const result = await this.plumberService.runCommand(
       'load-multi-rna',
-      job.data
+      loadPayload
     )
     return result
   }
