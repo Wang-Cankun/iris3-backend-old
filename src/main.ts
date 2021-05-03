@@ -3,7 +3,9 @@ import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import * as compression from 'compression'
 import { ConfigService } from '@nestjs/config'
-async function bootstrap() {
+import { initAdapters } from './adapters.init'
+
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { cors: true })
 
   // Get env configuration
@@ -11,6 +13,7 @@ async function bootstrap() {
 
   const port = configService.get('PORT')
 
+  initAdapters(app)
   // Add global prefix on all routes
   app.setGlobalPrefix('/deepmaps/api')
 

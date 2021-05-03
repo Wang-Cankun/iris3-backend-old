@@ -14,6 +14,8 @@ import * as Joi from '@hapi/joi'
 import { MulterModule } from '@nestjs/platform-express'
 import { JobModule } from './job/job.module'
 import { PlumberModule } from './plumber/plumber.module'
+import { SharedModule } from './shared/shared.module'
+import { EventsGateway } from './test.gateway'
 
 @Module({
   imports: [
@@ -47,15 +49,20 @@ import { PlumberModule } from './plumber/plumber.module'
       }),
       inject: [ConfigService]
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.MYSQL_HOST,
-      port: +process.env.MYSQL_PORT,
-      username: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_NAME,
-      autoLoadEntities: true,
-      synchronize: true
+
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: config.get('MYSQL_HOST'),
+        port: config.get('MYSQL_PORT'),
+        username: config.get('MYSQL_USER'),
+        password: config.get('MYSQL_PASSWORD'),
+        database: config.get('MYSQL_NAME'),
+        autoLoadEntities: true,
+        synchronize: true
+      }),
+      inject: [ConfigService]
     }),
     FileModule,
     AuthModule,
@@ -65,9 +72,10 @@ import { PlumberModule } from './plumber/plumber.module'
     CommandModule,
     QueueModule,
     JobModule,
-    PlumberModule
+    PlumberModule,
+    SharedModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService, EventsGateway]
 })
 export class AppModule {}

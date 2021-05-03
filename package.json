@@ -45,6 +45,7 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
     "dockerode": "^3.2.1",
+    "ioredis": "^4.27.1",
     "move-file": "^2.0.0",
     "mysql": "^2.18.1",
     "nodemailer": "^6.5.0",
