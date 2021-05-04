@@ -9,17 +9,13 @@
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
     <script>
-      window.s = io('http://localhost:9005/', {
-        query: {
-          token: '123'
-        }
-      })
+      window.s = io('http://localhost:9005/')
 
-      s.emit('deepmaps', {
-        event: 'progress',
-        data: { test: true, content: '123' }
+      s.emit('jobProgress', {
+        event: 'jobProgress',
+        data: 1234
       })
-      s.on('progress', (response) => {
+      s.on('jobProgress', (response) => {
         console.log(response)
       })
     </script>

@@ -21,8 +21,13 @@ export class EventsGateway {
     )
   }
 
-  @SubscribeMessage('deepmaps')
+  @SubscribeMessage('jobProgress')
   public returnStatus(@MessageBody() item: string): any {
-    return { event: 'progress', data: item }
+    return item
+  }
+
+  @SubscribeMessage('')
+  public hellp(@MessageBody() item: string): any {
+    return { event: 'progress', data: 1 }
   }
 }

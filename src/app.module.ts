@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { EmailModule } from './email/email.module'
 import { DockerModule } from './docker/docker.module'
-import { CommandModule } from './command/command.module'
 import { QueueModule } from './queue/queue.module'
 import * as Joi from '@hapi/joi'
 import { MulterModule } from '@nestjs/platform-express'
@@ -69,7 +68,6 @@ import { EventsGateway } from './test.gateway'
     UsersModule,
     EmailModule,
     DockerModule,
-    CommandModule,
     QueueModule,
     JobModule,
     PlumberModule,

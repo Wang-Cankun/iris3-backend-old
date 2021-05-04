@@ -48,7 +48,6 @@ export class RedisService {
           if (error) {
             return reject(error)
           }
-
           return resolve(reply)
         }
       )

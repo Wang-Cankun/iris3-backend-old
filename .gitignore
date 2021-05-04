@@ -1,6 +1,7 @@
 # Env
 *.env
 tmp
+plumber
 *.rdata
 *.rds
 *.rData
@@ -9,6 +10,7 @@ tmp
 pbmc_granulocyte_sorted_10k_per_barcode_metrics.csv
 /plumber/data/*
 /plumber/[0-9]*
+
 
 # compiled output
 /dist
