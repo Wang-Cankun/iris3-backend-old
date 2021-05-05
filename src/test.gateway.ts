@@ -26,6 +26,11 @@ export class EventsGateway {
     return item
   }
 
+  @SubscribeMessage('empty')
+  public empty(): any {
+    return 1
+  }
+
   @SubscribeMessage('')
   public hellp(@MessageBody() item: string): any {
     return { event: 'progress', data: 1 }
