@@ -355,4 +355,16 @@ export class QueueController {
     const jobInfo = await this.jobQueue.add('save', body)
     return jobInfo
   }
+
+  @Post('embedding-coords')
+  async embeddingCoords(@Body() body) {
+    const jobInfo = await this.jobQueue.add('embedding-coords', body)
+    return jobInfo
+  }
+
+  @Post('feature-coords')
+  async featureCoords(@Body() body) {
+    const jobInfo = await this.jobQueue.add('feature-coords', body)
+    return jobInfo
+  }
 }

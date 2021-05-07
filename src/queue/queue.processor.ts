@@ -501,4 +501,21 @@ export class QueueProcessor {
       )
     return result
   }
+
+  @Process('embedding-coords')
+  async embeddingCoords(job: Job) {
+    const result = await this.plumberService.runCommand(
+      'embedding-coords',
+      job.data
+    )
+    return result
+  }
+  @Process('feature-coords')
+  async featureCoords(job: Job) {
+    const result = await this.plumberService.runCommand(
+      'feature-coords',
+      job.data
+    )
+    return result
+  }
 }
