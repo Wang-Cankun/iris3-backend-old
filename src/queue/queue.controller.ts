@@ -236,6 +236,12 @@ export class QueueController {
     return jobInfo
   }
 
+  @Post('regulon-enrichment')
+  async regulonEnricch(@Body() body) {
+    const jobInfo = this.jobQueue.add('regulon-enrichment', body)
+    return jobInfo
+  }
+
   @Post('gsea-table')
   async gseaTable(@Body() body) {
     const jobInfo = this.jobQueue.add('gsea-table', body)
@@ -366,5 +372,21 @@ export class QueueController {
   async featureCoords(@Body() body) {
     const jobInfo = await this.jobQueue.add('feature-coords', body)
     return jobInfo
+  }
+
+  @Post('ras-coords')
+  async rasCoords(@Body() body) {
+    const jobInfo = await this.jobQueue.add('ras-coords', body)
+    return jobInfo
+  }
+  @Post('regulon-heatmap')
+  async regulonHeatmap(@Body() body) {
+    const jobInfo = await this.jobQueue.add('regulon-heatmap', body)
+    return jobInfo
+  }
+
+  @Post('run-r')
+  async runR(@Body() body) {
+    return await this.jobQueue.add('run-r', body)
   }
 }

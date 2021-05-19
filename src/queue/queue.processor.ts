@@ -518,4 +518,22 @@ export class QueueProcessor {
     )
     return result
   }
+
+  @Process('ras-coords')
+  async rasCoords(job: Job) {
+    return await this.plumberService.runCommand('ras-coords', job.data)
+  }
+  @Process('regulon-heatmap')
+  async regulonHeatmap(job: Job) {
+    return await this.plumberService.runCommand('regulon-heatmap', job.data)
+  }
+  @Process('regulon-enrichment')
+  async regulonEnrich(job: Job) {
+    return await this.plumberService.runCommand('regulon-enrichment', job.data)
+  }
+
+  @Process('run-r')
+  async runR(job: Job) {
+    return await this.plumberService.runCommand(job.data.type, job.data)
+  }
 }
