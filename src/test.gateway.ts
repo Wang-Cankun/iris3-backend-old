@@ -23,6 +23,7 @@ export class EventsGateway {
 
   @SubscribeMessage('jobProgress')
   public returnStatus(@MessageBody() item: string): any {
+    console.log(item)
     return item
   }
 
