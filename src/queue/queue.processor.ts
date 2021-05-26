@@ -536,4 +536,8 @@ export class QueueProcessor {
   async runR(job: Job) {
     return await this.plumberService.runCommand(job.data.type, job.data)
   }
+  @Process('run-r-static')
+  async runRStatic(job: Job) {
+    return await this.plumberService.runStaticImage(job.data.type, job.data)
+  }
 }

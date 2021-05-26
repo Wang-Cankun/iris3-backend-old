@@ -389,4 +389,8 @@ export class QueueController {
   async runR(@Body() body) {
     return await this.jobQueue.add('run-r', body)
   }
+  @Post('run-r-static')
+  async runRStatic(@Body() body) {
+    return await this.jobQueue.add('run-r-static', body)
+  }
 }
