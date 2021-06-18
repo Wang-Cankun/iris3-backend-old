@@ -15,6 +15,15 @@ export class File {
   @Column()
   jobid: string
 
+  @Column()
+  private: boolean
+
+  @Column()
+  creator: string
+
+  @Column()
+  tags: string
+
   @Column({ default: 1 })
   index: number
 
@@ -41,6 +50,8 @@ export class File {
 
   @Column()
   filename: string
+  @Column()
+  title: string
 
   @Column()
   path: string

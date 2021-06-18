@@ -18,9 +18,12 @@ export class FileService {
     return this.fileRepo.save(file)
   }
 
-  async findAll(jobid: string): Promise<File[]> {
+  async findOne(jobid: string): Promise<File[]> {
     return await this.fileRepo.find({
       jobid: jobid
     })
+  }
+  async findAll(): Promise<File[]> {
+    return await this.fileRepo.find()
   }
 }

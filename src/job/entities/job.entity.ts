@@ -16,6 +16,12 @@ export class Job {
   jobid: string
 
   @Column()
+  private: boolean
+
+  @Column()
+  creator: string
+
+  @Column()
   email: string
 
   @Column()
@@ -35,6 +41,9 @@ export class Job {
 
   @Column()
   species: string
+
+  @Column()
+  tags: string
 
   @Column()
   description: string

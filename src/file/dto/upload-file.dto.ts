@@ -32,4 +32,12 @@ export class UploadFileDto {
 
   @IsNumber()
   size: number
+  @IsString()
+  private: boolean
+  @IsString()
+  creator: string
+  @IsString()
+  tags: string
+  @IsString()
+  title: string
 }

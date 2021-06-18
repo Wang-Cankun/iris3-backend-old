@@ -33,9 +33,14 @@ export class FileController {
     return await this.fileQueue.getJob(id)
   }
 
+  @Get('')
+  async getAllJobs() {
+    return await this.fileService.findAll()
+  }
+
   @Get('upload/:id')
   async findOne(@Param('id') id: string): Promise<File[]> {
-    return await this.fileService.findAll(id)
+    return await this.fileService.findOne(id)
   }
 
   @Post('upload')
@@ -45,13 +50,23 @@ export class FileController {
       ...file,
       jobid: body.jobid,
       index: body.index,
-      species: body.species
+      species: body.species,
+      creator: body.creator,
+      private: body.private,
+      tags: body.tags,
+      title: body.title,
+      description: body.description
     }))
+    console.log('saving1')
+    console.log(body)
     console.log(uploadDataInfo)
     if (body.jobid !== 'example') {
       for (const f of uploadDataInfo) {
         await this.fileService.create(f)
       }
+    } else if (body.title === 'Example multiome') {
+      console.log('saving2')
+      await this.fileService.create(uploadDataInfo[0])
     }
 
     return uploadDataInfo

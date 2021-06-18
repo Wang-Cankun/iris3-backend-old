@@ -65,7 +65,7 @@ export class QueueProcessor {
 
   @Process('load')
   async loadExpression(job: Job) {
-    const uploadFiles = await this.fileService.findAll(job.data.jobid)
+    const uploadFiles = await this.fileService.findOne(job.data.jobid)
 
     const rnaFile = uploadFiles.filter((file) => file.fieldname === 'singleRna')
     const labelFile = uploadFiles.filter(
@@ -79,7 +79,7 @@ export class QueueProcessor {
 
   @Process('load-multi-rna')
   async loadMultiRna(job: Job) {
-    const uploadFiles = await this.fileService.findAll(job.data.jobid)
+    const uploadFiles = await this.fileService.findOne(job.data.jobid)
 
     const rnaFile = uploadFiles.filter((file) => file.fieldname === 'multiRna')
     const labelFile = uploadFiles.filter(
@@ -100,7 +100,7 @@ export class QueueProcessor {
 
   @Process('load-multiome')
   async loadMultiome(job: Job) {
-    const uploadFiles = await this.fileService.findAll(job.data.jobid)
+    const uploadFiles = await this.fileService.findOne(job.data.jobid)
 
     const rnaFile = uploadFiles.filter((file) => file.fieldname === 'multiome')
     const labelFile = uploadFiles.filter(

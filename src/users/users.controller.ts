@@ -18,7 +18,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 import { JwtPayload } from 'src/auth/decorators/jwt-payload.decorator'
 
 @ApiTags('users')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -34,6 +34,12 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard)
   findOne(@JwtPayload('email') email: string): Promise<User> {
+    return this.usersService.findOneByEmail(email)
+  }
+
+  @Get(':email')
+  // @UseGuards(JwtAuthGuard)
+  findOneEmail(@Param('email') email: string): Promise<User> {
     return this.usersService.findOneByEmail(email)
   }
 

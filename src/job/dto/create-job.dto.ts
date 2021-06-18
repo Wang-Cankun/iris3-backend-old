@@ -17,4 +17,10 @@ export class CreateJobDto {
   species: string
   @IsString()
   description: string
+  @IsString()
+  private: boolean
+  @IsString()
+  creator: string
+  @IsString()
+  tags: string
 }
