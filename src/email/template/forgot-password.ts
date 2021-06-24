@@ -1,0 +1,335 @@
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const forgotPasswordEmail = (email, token) => {
+  const year = new Date().getFullYear()
+  const baseUrl = process.env.FRONTEND_URL
+  const resetPasswordLink =
+    baseUrl + 'login/forgot/reset/?token=' + token + '&email=' + email
+  return `<table
+		class="body"
+		style="
+			border-collapse: separate;
+			mso-table-lspace: 0pt;
+			mso-table-rspace: 0pt;
+			width: 100%;
+			background-color: #f6f6f6;
+		"
+		border="0"
+		cellspacing="0"
+		cellpadding="0"
+	>
+		<tbody>
+			<tr>
+				<td style="font-family: sans-serif; font-size: 14px; vertical-align: top">
+					&nbsp;
+				</td>
+				<td
+					class="container"
+					style="
+						font-family: sans-serif;
+						font-size: 14px;
+						vertical-align: top;
+						display: block;
+						margin: 0 auto;
+						max-width: 700px;
+						padding: 10px;
+						width: 700px;
+					"
+				>
+					<div
+						class="content"
+						style="
+							box-sizing: border-box;
+							display: block;
+							margin: 0 auto;
+							max-width: 700px;
+							padding: 10px;
+						"
+					>
+						<span
+							class="preheader"
+							style="
+								color: transparent;
+								display: none;
+								height: 0;
+								max-height: 0;
+								max-width: 0;
+								opacity: 0;
+								overflow: hidden;
+								mso-hide: all;
+								visibility: hidden;
+								width: 0;
+							"
+							><g
+								class="
+									gr_ gr_65 gr-alert gr_spell gr_inline_cards gr_run_anim
+									ContextualSpelling
+									ins-del
+									multiReplace
+								"
+								id="65"
+								data-gr-id="65"
+							></g
+						></span>
+						<table
+							class="main"
+							style="
+								border-collapse: separate;
+								mso-table-lspace: 0pt;
+								mso-table-rspace: 0pt;
+								width: 100%;
+								background: #ffffff;
+								border-radius: 3px;
+							"
+						>
+							<tbody>
+								<tr>
+									<td
+										class="wrapper"
+										style="
+											font-family: sans-serif;
+											font-size: 14px;
+											vertical-align: top;
+											box-sizing: border-box;
+											padding: 20px;
+										"
+									>
+										<br />
+										<table
+											style="
+												border-collapse: separate;
+												mso-table-lspace: 0pt;
+												mso-table-rspace: 0pt;
+												width: 100%;
+											"
+											border="0"
+											cellspacing="0"
+											cellpadding="0"
+										>
+											<tbody>
+												<tr>
+													<td
+														style="
+															font-family: sans-serif;
+															font-size: 14px;
+															vertical-align: top;
+														"
+													>
+														<table
+															border="0"
+															width="100%"
+															cellspacing="0"
+															cellpadding="0"
+														>
+															<tbody>
+																<tr>
+																	<td class="subhead">Hello,</td>
+																</tr>
+																<tr>
+																	<td class="h1" style="padding: 5px 0 0 0">
+																		<br />
+																		<div>
+																			<div>
+																				<span
+																					>You have submitted a request to reset your password.<br /><br /></span
+																				><span>Your email: ${email}</span>
+																			</div>
+																		</div>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<p
+															style="
+																font-family: sans-serif;
+																font-size: 14px;
+																font-weight: normal;
+																margin: 0;
+																margin-bottom: 15px;
+															"
+														></p>
+														<table
+															class="btn btn-primary"
+															style="
+																border-collapse: separate;
+																mso-table-lspace: 0pt;
+																mso-table-rspace: 0pt;
+																width: 100%;
+																box-sizing: border-box;
+															"
+															border="0"
+															cellspacing="0"
+															cellpadding="0"
+														>
+															<tbody>
+																<tr>
+																	<td
+																		style="
+																			font-family: sans-serif;
+																			font-size: 14px;
+																			vertical-align: top;
+																			padding-bottom: 15px;
+																		"
+																		align="left"
+																	>
+																		<table
+																			style="
+																				border-collapse: separate;
+																				mso-table-lspace: 0pt;
+																				mso-table-rspace: 0pt;
+																				width: auto;
+																			"
+																			border="0"
+																			cellspacing="0"
+																			cellpadding="0"
+																		>
+																			<tbody>
+																				<tr>
+																					<td
+																						style="
+																							font-family: sans-serif;
+																							font-size: 14px;
+																							vertical-align: top;
+																							background-color: #3498db;
+																							border-radius: 5px;
+																							text-align: center;
+																						"
+																					>
+																						<a
+																							style="
+																								display: inline-block;
+																								color: #ffffff;
+																								background-color: #3498db;
+																								border: solid 1px #3498db;
+																								border-radius: 5px;
+																								box-sizing: border-box;
+																								cursor: pointer;
+																								text-decoration: none;
+																								font-size: 14px;
+																								font-weight: bold;
+																								margin: 0;
+																								padding: 12px 25px;
+																								text-transform: capitalize;
+																								border-color: #3498db;
+																							"
+																							href="${resetPasswordLink}"
+																							target="_blank"
+																							rel="noopener"
+																							>Click to reset your password</a
+																						>
+																					</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																		<br />
+																		<table>
+																			<tbody>
+																				<tr>
+																					<td>
+																						<p>
+																							Note that the link will be expired in 20 miniutes.
+																						</p>
+																						<p>
+																							If you&rsquo;re having trouble
+																							clicking the button, copy and paste
+																							the URL below into your web browser:
+																						</p>
+																					</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																		<span>&nbsp;</span
+																		><span
+																			>${resetPasswordLink}<br
+																		/></span>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+	
+						<div
+							class="footer"
+							style="
+								clear: both;
+								margin-top: 10px;
+								text-align: center;
+								width: 100%;
+							"
+						>
+							<table
+								style="
+									border-collapse: separate;
+									mso-table-lspace: 0pt;
+									mso-table-rspace: 0pt;
+									width: 100%;
+								"
+								border="0"
+								cellspacing="0"
+								cellpadding="0"
+							>
+								<tbody>
+									<tr>
+										<td
+											class="content-block"
+											style="
+												font-family: sans-serif;
+												vertical-align: top;
+												padding-bottom: 10px;
+												padding-top: 10px;
+												font-size: 12px;
+												color: #999999;
+												text-align: center;
+											"
+										>
+											<span>Copyright ${year} &copy; </span
+											><a
+												href="http://u.osu.edu/bmbl"
+												target="_blank"
+												rel="noopener"
+												>BMBL</a
+											><span>, </span
+											><a
+												href="https://medicine.osu.edu/departments/biomedical-informatics/"
+												target="_blank"
+												rel="noopener"
+												>OSU</a
+											><span>. All rights reserved. </span>
+										</td>
+									</tr>
+									<tr>
+										<td
+											class="content-block powered-by"
+											style="
+												font-family: sans-serif;
+												vertical-align: top;
+												padding-bottom: 10px;
+												padding-top: 10px;
+												font-size: 12px;
+												color: #999999;
+												text-align: center;
+											"
+										>
+											<a href="mailto:qin.ma\@osumc.edu" title="qin.ma\@osumc.edu"
+												>Contact us: qin.ma\@osumc.edu</a
+											><span> </span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	`
+}
+
+export default forgotPasswordEmail

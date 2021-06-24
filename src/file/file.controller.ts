@@ -16,11 +16,13 @@ import { InjectQueue } from '@nestjs/bull'
 import { FileService } from './file.service'
 import { ConfigService } from '@nestjs/config'
 import { File } from './entities/file.entity'
+import { EmailService } from '../email/email.service'
 
 @Controller('file')
 export class FileController {
   constructor(
     private configService: ConfigService,
+    private readonly emailService: EmailService,
 
     @InjectQueue('file')
     private readonly fileQueue: Queue,
@@ -57,18 +59,21 @@ export class FileController {
       title: body.title,
       description: body.description
     }))
-    console.log('saving1')
-    console.log(body)
-    console.log(uploadDataInfo)
     if (body.jobid !== 'example') {
       for (const f of uploadDataInfo) {
         await this.fileService.create(f)
       }
+      this.emailService.sendStartJobEmail(body.creator, body.jobid)
     } else if (body.title === 'Example multiome') {
-      console.log('saving2')
       await this.fileService.create(uploadDataInfo[0])
     }
 
     return uploadDataInfo
+  }
+
+  @Post('archive')
+  async archiveJob(@Body() body) {
+    console.log(body)
+    await this.fileService.archiveJobById(body.jobid)
   }
 }

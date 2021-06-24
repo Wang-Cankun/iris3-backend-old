@@ -35,8 +35,7 @@ import { EventsGateway } from './test.gateway'
         JWT_SECRET: Joi.required(),
         JWT_EXPIRATION_TIME: Joi.required(),
         FRONTEND_URL: Joi.required(),
-        EMAIL_NAME: Joi.required(),
-        EMAIL_PASSWORD: Joi.required(),
+        EMAIL_TOKEN: Joi.required(),
         GOOGLE_CLIENT_ID: Joi.required(),
         GOOGLE_SECRET: Joi.required()
       })

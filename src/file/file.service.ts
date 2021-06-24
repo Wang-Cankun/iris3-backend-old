@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { UploadFileDto } from './dto/upload-file.dto'
@@ -25,5 +25,17 @@ export class FileService {
   }
   async findAll(): Promise<File[]> {
     return await this.fileRepo.find()
+  }
+  async archiveJobById(jobid: string): Promise<File> {
+    const job = await this.fileRepo.findOne({
+      where: {
+        jobid: jobid
+      }
+    })
+    job.status = 'archive'
+    if (!job) {
+      throw new NotFoundException(`Job ID ${jobid} not found`)
+    }
+    return await this.fileRepo.save(job)
   }
 }

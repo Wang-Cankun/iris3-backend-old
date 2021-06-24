@@ -40,4 +40,8 @@ export class UploadFileDto {
   tags: string
   @IsString()
   title: string
+  @IsString()
+  description: string
+  @IsString()
+  status: string
 }

@@ -27,6 +27,9 @@ export class File {
   @Column({ default: 1 })
   index: number
 
+  @Column({ default: 'active' })
+  status: string
+
   @Column()
   species: string
 
@@ -52,6 +55,8 @@ export class File {
   filename: string
   @Column()
   title: string
+  @Column()
+  description: string
 
   @Column()
   path: string

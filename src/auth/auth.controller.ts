@@ -27,13 +27,14 @@ import { AuthGuard } from '@nestjs/passport'
 import { LocalAuthGuard } from './guards/local-auth.guard'
 import { JwtPayload } from './decorators/jwt-payload.decorator'
 import { JwtPayloadDto } from './dto/jwt-payload.dto'
+import { EmailService } from '../email/email.service'
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly usersService: UsersService
+    private readonly emailService: EmailService
   ) {}
 
   @Get('test')
@@ -74,6 +75,7 @@ export class AuthController {
   @UseGuards(UserRegisteredGuard)
   @Post('register')
   create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    this.emailService.sendCreateUserEmail(createUserDto.email)
     return this.authService.createUser(createUserDto)
   }
 

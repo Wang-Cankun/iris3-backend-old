@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MulterModule } from '@nestjs/platform-express'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { EmailService } from '../email/email.service'
 import { Job } from '../job/entities/job.entity'
 import { File } from './entities/file.entity'
 import { FileController } from './file.controller'
@@ -32,6 +33,6 @@ import { FileService } from './file.service'
     })
   ],
   controllers: [FileController],
-  providers: [FileService, FileProcessor]
+  providers: [EmailService, FileService, FileProcessor]
 })
 export class FileModule {}

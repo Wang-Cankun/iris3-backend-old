@@ -149,6 +149,7 @@ export class AuthService {
       email,
       token
     )
+
     return sendResetPasswordEmail
   }
 }
