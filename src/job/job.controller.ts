@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common'
 import { JobService } from './job.service'
-import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
+import { CreateJobDto } from './dto/create-job.dto'
 
 @Controller('job')
 export class JobController {
@@ -10,6 +10,11 @@ export class JobController {
   @Post()
   create(@Body() createJobDto: CreateJobDto) {
     return this.jobService.create(createJobDto)
+  }
+
+  @Post('project')
+  listJobs(@Body() projectUid: string) {
+    return this.jobService.listJobsById(projectUid)
   }
 
   @Get()

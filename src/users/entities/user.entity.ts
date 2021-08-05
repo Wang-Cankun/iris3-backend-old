@@ -1,4 +1,4 @@
-import { Job } from 'src/job/entities/job.entity'
+import { Project } from 'src/project/entities/project.entity'
 import {
   Entity,
   Column,
@@ -6,18 +6,30 @@ import {
   JoinTable,
   ManyToMany,
   CreateDateColumn,
-  PrimaryColumn
+  PrimaryColumn,
+  OneToMany,
+  Generated,
+  JoinColumn
 } from 'typeorm'
+
+export enum UserRole {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  GUEST = 'guest'
+}
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ unique: true })
+  @PrimaryColumn({ unique: true })
   email: string
 
-  // { select: false }
+  @PrimaryColumn()
+  @Generated('uuid')
+  userId: string
+
   @Column()
   password: string
 
@@ -39,13 +51,19 @@ export class User {
   @Column({ default: true })
   isActive: boolean
 
-  @JoinTable()
-  @ManyToMany(
-    () => Job,
-    (job) => job.user,
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.GUEST
+  })
+  role: UserRole
+
+  @OneToMany(
+    (type) => Project,
+    (project) => project.user,
     {
       cascade: true
     }
   )
-  job: Job[]
+  projects: Project[]
 }

@@ -2,25 +2,15 @@ import { IsString, IsBoolean } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 
 export class CreateJobDto {
-  @ApiProperty({ description: 'The email of a user.' })
   @IsString()
-  readonly email: string
+  title: string
+
   @IsString()
-  readonly title: string
-  @IsString()
-  status: string
-  @IsString()
-  expFile: string
-  @IsString()
-  labelFile: string
-  @IsString()
-  species: string
+  type: string
+
   @IsString()
   description: string
+
   @IsString()
-  private: boolean
-  @IsString()
-  creator: string
-  @IsString()
-  tags: string
+  projectUid: string
 }

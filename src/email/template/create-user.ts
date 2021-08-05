@@ -128,7 +128,7 @@ const createUserEmail = (email) => {
 																		<div>
 																			<div>
 																				<span
-																					>Welcome to use DeepMAPS. You have registered account.<br /><br /></span
+																					>Thanks for using DeepMAPS. You have registered an account.<br /><br /></span
 																				><span>Your email: ${email}</span>
 																			</div>
 																		</div>
@@ -212,7 +212,7 @@ const createUserEmail = (email) => {
 																							href="${baseUrl}"
 																							target="_blank"
 																							rel="noopener"
-																							>Click to reset your password</a
+																							>Click to enter DeepMAPS</a
 																						>
 																					</td>
 																				</tr>

@@ -90,15 +90,15 @@ export class AuthService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const job = await Promise.all(
-      createUserDto.job.map((email) =>
-        this.usersService.preloadJobByName(email)
+    const projects = await Promise.all(
+      createUserDto.projects.map((projectId) =>
+        this.usersService.preloadProjectById(projectId)
       )
     )
     createUserDto.password = await this.hashPassword(createUserDto.password)
     const user = this.userRepository.create({
       ...createUserDto,
-      job
+      projects
     })
     return this.userRepository.save(user)
   }

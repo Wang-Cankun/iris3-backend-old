@@ -1,11 +1,23 @@
-import { User } from 'src/users/entities/user.entity'
+import { Project } from '../../project/entities/project.entity'
+
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToMany,
-  CreateDateColumn
+  CreateDateColumn,
+  ManyToOne,
+  Generated,
+  JoinTable,
+  JoinColumn,
+  UpdateDateColumn
 } from 'typeorm'
+
+export enum STATUS {
+  SUCCESS = 'success',
+  ERROR = 'error',
+  RUNNING = 'running',
+  QUEUEING = 'queueing'
+}
 
 @Entity()
 export class Job {
@@ -13,44 +25,38 @@ export class Job {
   id: number
 
   @Column()
-  jobid: string
-
-  @Column()
-  private: boolean
-
-  @Column()
-  creator: string
-
-  @Column()
-  email: string
-
-  @Column()
-  title: string
+  @Generated('uuid')
+  jobId: string
 
   @CreateDateColumn()
   createTime: string
 
-  @Column()
-  status: string
+  @UpdateDateColumn()
+  updateTime: string
+
+  @Column({
+    type: 'enum',
+    enum: STATUS,
+    default: STATUS.QUEUEING
+  })
+  status: STATUS
 
   @Column()
-  expFile: string
+  title: string
 
   @Column()
-  labelFile: string
-
-  @Column()
-  species: string
-
-  @Column()
-  tags: string
+  type: string
 
   @Column()
   description: string
 
-  @ManyToMany(
-    (type) => User,
-    (user) => user.job
+  @JoinColumn()
+  @ManyToOne(
+    (type) => Project,
+    (project) => project.jobs,
+    {
+      cascade: true
+    }
   )
-  user: User[]
+  project: Project
 }

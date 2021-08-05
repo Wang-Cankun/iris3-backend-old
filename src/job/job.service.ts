@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { Project } from '../project/entities/project.entity'
 import { CreateJobDto } from './dto/create-job.dto'
 import { UpdateJobDto } from './dto/update-job.dto'
 import { Job } from './entities/job.entity'
@@ -9,20 +10,37 @@ import { Job } from './entities/job.entity'
 export class JobService {
   constructor(
     @InjectRepository(Job)
-    private readonly jobRepository: Repository<Job>
+    private readonly jobRepository: Repository<Job>,
+
+    @InjectRepository(Project)
+    private readonly projectRepository: Repository<Project>
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<Job> {
+    const project = await this.preloadProjectById(createJobDto.projectUid)
+    console.log(project)
     const job = this.jobRepository.create({
-      ...createJobDto
+      ...createJobDto,
+      project
     })
     return this.jobRepository.save(job)
   }
 
   findAll() {
     return this.jobRepository.find({
-      relations: ['user']
+      relations: ['project']
     })
+  }
+
+  async listJobsById(projectUid: string) {
+    const job = await this.jobRepository.find({
+      where: { projectUid },
+      relations: ['project']
+    })
+    if (!job) {
+      throw new NotFoundException(`Project ID #${projectUid} not found`)
+    }
+    return job
   }
 
   async findOne(id: number) {
@@ -34,26 +52,19 @@ export class JobService {
   }
 
   async update(id: number, updateJobDto: UpdateJobDto) {
-    const user = []
     const job = await this.jobRepository.preload({
       id: +id,
-      ...updateJobDto,
-      user
+      ...updateJobDto
     })
-    if (!user) {
-      throw new NotFoundException(`Job ID #${id} not found`)
-    }
+
     return this.jobRepository.save(job)
   }
 
   remove(id: number) {
     return `This action removes a #${id} job`
   }
-  async preloadJobByName(id: string): Promise<Job> {
-    const existingJob = await this.jobRepository.findOne(id)
-    if (existingJob) {
-      return existingJob
-    }
-    return this.jobRepository.create(existingJob)
+  async preloadProjectById(projectUid: string): Promise<Project> {
+    const existingProject = await this.projectRepository.findOne({ projectUid })
+    return existingProject
   }
 }

@@ -66,7 +66,10 @@ export class File {
 
   @ManyToMany(
     (type) => Job,
-    (job) => job.jobid
+    (job) => job.jobId,
+    {
+      cascade: true
+    }
   )
   job: Job[]
 }

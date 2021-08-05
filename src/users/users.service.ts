@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { Repository } from 'typeorm'
-import { Job } from 'src/job/entities/job.entity'
+import { Project } from '../project/entities/project.entity'
 
 // export type User = any
 export type Users = any
@@ -13,8 +13,8 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    @InjectRepository(Job)
-    private readonly jobRepository: Repository<Job>
+    @InjectRepository(Project)
+    private readonly projectRepository: Repository<Project>
   ) {}
 
   isValidEmail(email: string): boolean {
@@ -26,7 +26,7 @@ export class UsersService {
 
   findAll(): Promise<User[]> {
     return this.userRepository.find({
-      relations: ['job']
+      relations: ['projects']
     })
   }
 
@@ -51,20 +51,20 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const job =
-      updateUserDto.job &&
+    const projects =
+      updateUserDto.projects &&
       (await Promise.all(
-        updateUserDto.job.map((email) => this.preloadJobByName(email))
+        updateUserDto.projects.map((projectUid) =>
+          this.preloadProjectById(projectUid)
+        )
       ))
 
     const user = await this.userRepository.preload({
       id: +id,
       ...updateUserDto,
-      job
+      projects
     })
-    if (!user) {
-      throw new NotFoundException(`User ID #${id} not found`)
-    }
+
     return this.userRepository.save(user)
   }
 
@@ -84,12 +84,12 @@ export class UsersService {
     return this.userRepository.save(userFromDb)
   }
 
-  async preloadJobByName(id: string): Promise<Job> {
-    const existingJob = await this.jobRepository.findOne(id)
-    if (existingJob) {
-      return existingJob
+  async preloadProjectById(projectUid: string): Promise<Project> {
+    const existingProject = await this.projectRepository.findOne({ projectUid })
+    if (existingProject) {
+      return existingProject
     }
-    return this.jobRepository.create(existingJob)
+    return this.projectRepository.create(existingProject)
   }
 
   async test(updateUserDto: UpdateUserDto): Promise<any> {

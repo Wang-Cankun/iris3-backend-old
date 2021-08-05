@@ -15,6 +15,7 @@ import { JobModule } from './job/job.module'
 import { PlumberModule } from './plumber/plumber.module'
 import { SharedModule } from './shared/shared.module'
 import { EventsGateway } from './test.gateway'
+import { ProjectModule } from './project/project.module'
 
 @Module({
   imports: [
@@ -70,7 +71,8 @@ import { EventsGateway } from './test.gateway'
     QueueModule,
     JobModule,
     PlumberModule,
-    SharedModule
+    SharedModule,
+    ProjectModule
   ],
   controllers: [AppController],
   providers: [AppService, EventsGateway]
